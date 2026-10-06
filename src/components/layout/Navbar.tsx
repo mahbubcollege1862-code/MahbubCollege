@@ -99,7 +99,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation Links with Clear Active State */}
-          <nav className="hidden lg:flex items-center space-x-2 xl:space-x-4">
+          <nav className="hidden lg:flex items-center space-x-3 xl:space-x-5">
             {navItems.map((item) => {
               const isActive = activeSection === item.id;
               return (
@@ -111,15 +111,15 @@ export default function Navbar() {
                       setActiveSection(item.id);
                     }
                   }}
-                  className={`relative px-3 py-1.5 rounded-full text-sm font-google-sans transition-all duration-200 flex items-center ${
+                  className={`relative py-2 px-1 text-sm font-google-sans transition-colors duration-150 inline-flex items-center ${
                     isActive
-                      ? 'text-[#800000] font-bold bg-red-50/90 ring-1 ring-[#800000]/25 shadow-2xs'
-                      : 'text-gray-700 font-medium hover:text-[#800000] hover:bg-gray-50/80'
+                      ? 'text-[#800000] font-bold'
+                      : 'text-gray-700 font-medium hover:text-[#800000]'
                   }`}
                 >
                   <span>{item.label}</span>
                   {isActive && (
-                    <span className="absolute -bottom-[9px] left-3 right-3 h-[2.5px] bg-[#800000] rounded-full animate-in fade-in zoom-in-75 duration-150" />
+                    <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#800000] rounded-full" />
                   )}
                 </Link>
               );
@@ -173,16 +173,13 @@ export default function Navbar() {
                     setActiveSection(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`px-3.5 py-2.5 rounded-lg text-sm transition-all flex items-center justify-between ${
+                  className={`py-2 px-2 text-sm transition-colors flex items-center justify-between border-b ${
                     isActive
-                      ? 'bg-[#800000] text-white font-semibold shadow-sm'
-                      : 'text-gray-700 font-medium hover:bg-red-50/60 hover:text-[#800000]'
+                      ? 'text-[#800000] font-bold border-[#800000]'
+                      : 'text-gray-700 font-medium border-transparent hover:text-[#800000]'
                   }`}
                 >
                   <span>{item.label}</span>
-                  {isActive && (
-                    <span className="w-2 h-2 rounded-full bg-white shrink-0" />
-                  )}
                 </Link>
               );
             })}
