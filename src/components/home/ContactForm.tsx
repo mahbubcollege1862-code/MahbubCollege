@@ -303,15 +303,9 @@ export default function ContactForm() {
               <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
                 <CheckCircle2 className="w-16 h-16 text-emerald-400 mb-4 animate-bounce" />
                 <h3 className="text-2xl font-bold text-white mb-2">Registration Successful!</h3>
-                <p className="text-gray-300 text-base max-w-md leading-relaxed mb-6">
+                <p className="text-gray-300 text-base max-w-md leading-relaxed">
                   Thank you for registering. You have taken a vital step in connecting with the Mahbub College Students Association and supporting our shared heritage.
                 </p>
-                <button
-                  onClick={() => setSuccess(false)}
-                  className="px-6 py-2.5 rounded-full bg-[#800000] text-white text-sm font-semibold hover:bg-red-800 transition-colors cursor-pointer shadow-md"
-                >
-                  Register Another Member
-                </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
