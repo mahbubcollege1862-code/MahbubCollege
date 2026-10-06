@@ -54,6 +54,7 @@ export default async function GalleryPage() {
                       src={item.photo_url}
                       alt={item.name}
                       fill
+                      unoptimized
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover object-center group-hover:scale-105 transition-transform duration-500 filter contrast-[1.02]"
                     />

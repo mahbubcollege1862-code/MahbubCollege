@@ -111,6 +111,7 @@ export default function LegacyBuildersClient({ builders }: Props) {
                   src={builder.photo_url}
                   alt={builder.name}
                   fill
+                  unoptimized
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 265px, 280px"
                   className="object-cover object-top group-hover:scale-103 transition-transform duration-500 filter contrast-[1.02]"
                 />

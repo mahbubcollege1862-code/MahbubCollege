@@ -28,7 +28,8 @@ export default function FormerStudentsClient({ students }: Props) {
   }
 
   return (
-    <section id="alumni" className="relative w-full bg-[#800000] py-16 lg:py-24 overflow-hidden">
+    <section id="alumni" className="relative w-full bg-[#800000] py-16 lg:py-24 overflow-hidden scroll-mt-20">
+      <div id="former-students" className="absolute -top-24 left-0" />
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* Header Row: Title & Subtitle + Carousel Arrows (Matches Figma Frame 1000001798) */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 lg:mb-12 font-google-sans">
@@ -77,6 +78,7 @@ export default function FormerStudentsClient({ students }: Props) {
                   src={student.photo_url}
                   alt={student.name}
                   fill
+                  unoptimized
                   sizes="(max-width: 640px) 100vw, 264px"
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-500 filter contrast-[1.02]"
                 />

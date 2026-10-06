@@ -137,6 +137,7 @@ export default function LeadersClient({ headmasters, committee }: Props) {
                       src={leader.photo_url}
                       alt={leader.name}
                       fill
+                      unoptimized
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 265px, 280px"
                       className="object-cover object-top group-hover:scale-103 transition-transform duration-500 filter contrast-[1.02]"
                     />
@@ -214,6 +215,7 @@ export default function LeadersClient({ headmasters, committee }: Props) {
                       src={member.photo_url}
                       alt={member.name}
                       fill
+                      unoptimized
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 265px, 280px"
                       className="object-cover object-top group-hover:scale-103 transition-transform duration-500 filter contrast-[1.02]"
                     />
