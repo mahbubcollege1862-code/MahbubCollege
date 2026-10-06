@@ -42,6 +42,7 @@ export async function POST(req: Request) {
 
     // 1. Provision / link user in Supabase auth.users
     const userId = await provisionAlumniUser(formattedPhone, fullName.trim());
+    console.log('[Register API] Registration linked with Auth User ID:', userId);
 
     // 2. Insert record into public.registrations
     const { data, error } = await supabase.from('registrations').insert([
