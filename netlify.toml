@@ -5,6 +5,10 @@
 [build.environment]
   NODE_VERSION = "20"
 
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+
 [[headers]]
   for = "/_next/static/*"
   [headers.values]
