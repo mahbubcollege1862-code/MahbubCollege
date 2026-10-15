@@ -2,9 +2,6 @@ import React from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { HeritageItem } from '@/types/database';
-import { FALLBACK_HERITAGE } from '@/lib/fallbackData';
-
-export const revalidate = 60; // Dynamic ISR revalidation every 60 seconds
 
 export default async function Heritage() {
   let items: HeritageItem[] = [];
@@ -20,14 +17,9 @@ export default async function Heritage() {
       console.error('Error fetching heritage items from Supabase:', error.message);
     }
 
-    if (data && data.length > 0) {
-      items = data;
-    } else {
-      items = FALLBACK_HERITAGE;
-    }
+    items = data ?? [];
   } catch (err) {
     console.error('Exception fetching heritage items:', err);
-    items = FALLBACK_HERITAGE;
   }
 
   return (

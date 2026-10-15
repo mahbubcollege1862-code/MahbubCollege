@@ -31,7 +31,7 @@ export interface Leader {
   id?: number;
   name: string;
   title: string;
-  category: 'headmaster' | 'committee';
+  category?: 'headmaster' | 'committee';
   photo_url: string;
   display_order?: number;
   is_active?: boolean;

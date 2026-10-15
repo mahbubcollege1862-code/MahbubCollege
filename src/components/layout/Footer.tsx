@@ -6,12 +6,11 @@ export default function Footer() {
   const quickLinks = [
     { label: 'About Us', href: '/#about' },
     { label: 'Former Students', href: '/#alumni' },
-    { label: 'Our Pride', href: '/#heritage' },
-    { label: 'Legacy', href: '/#legacy' },
+    { label: 'Our Legacy', href: '/#legacy' },
     { label: 'Leaders', href: '/#leaders' },
-    { label: 'News & Events', href: '/#news' },
+    { label: 'Guides', href: '/#guides' },
     { label: 'Gallery', href: '/#gallery' },
-    { label: 'Contact Us', href: '/#contact' },
+    { label: 'Contact Us', href: '/#footer' },
   ];
 
   const legalLinks = [
@@ -22,7 +21,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="relative w-full bg-[#0E2340] text-white pt-16 pb-10 overflow-hidden font-google-sans border-t border-[#1a365d]">
+    <footer id="footer" className="relative w-full bg-[#0E2340] text-white pt-16 pb-10 overflow-hidden font-google-sans border-t border-[#1a365d]">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-12 border-b border-white/10">
@@ -44,8 +43,8 @@ export default function Footer() {
                 <div className="relative w-4 h-4 shrink-0">
                   <Image src="/footer/Email.svg" alt="Email" fill className="object-contain" />
                 </div>
-                <a href="mailto:support@mahbubcollege.com" className="hover:text-white transition-colors">
-                  support@mahbubcollege.com
+                <a href="mailto:mahbubcollege1862@gmail.com" className="hover:text-white transition-colors">
+                  mahbubcollege1862@gmail.com
                 </a>
               </div>
 
@@ -53,8 +52,8 @@ export default function Footer() {
                 <div className="relative w-4 h-4 shrink-0">
                   <Image src="/footer/Phone Number.svg" alt="Phone" fill className="object-contain" />
                 </div>
-                <a href="tel:+918885551660" className="hover:text-white transition-colors">
-                  +91 &nbsp;888 555 1660
+                <a href="tel:+918008576667" className="hover:text-white transition-colors">
+                  +91 &nbsp;800 857 6667
                 </a>
               </div>
 

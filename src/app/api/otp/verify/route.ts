@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     const formattedPhone = formatIndianPhone(phone);
-    const result = verifyOtp(formattedPhone, otp);
+    const result = await verifyOtp(formattedPhone, otp);
 
     if (!result.success) {
       return NextResponse.json(

@@ -37,3 +37,11 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Sub-pixel offset applied by useAutoScroll for smooth auto-scrolling carousels */
+.auto-scroll > * {
+  transform: translate3d(var(--auto-scroll-sub, 0px), 0, 0);
+  will-change: transform;
+  /* cards use transition-all; a transform transition would lag behind each frame */
+  transition: box-shadow 300ms !important;
+}

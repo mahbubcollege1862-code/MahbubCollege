@@ -3,7 +3,11 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
-import { CheckCircle2, AlertCircle, Loader2, Users, BookOpen, School } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, Users, BookOpen, School, IdCard } from 'lucide-react';
+import MemberCardPanel from '@/components/card/MemberCardPanel';
+import type { MembershipCardData } from '@/components/card/MembershipCard';
+import CardLookup from './CardLookup';
+import { blobToDataUrl, resizePhoto, uploadMemberPhoto } from '@/lib/photoUpload';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -18,6 +22,10 @@ export default function ContactForm() {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [cardData, setCardData] = useState<MembershipCardData | null>(null);
+  const [showLookup, setShowLookup] = useState(false);
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
+  const [photoPreview, setPhotoPreview] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   // OTP Verification States
@@ -84,6 +92,21 @@ export default function ContactForm() {
       setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setErrorMessage('');
+    try {
+      const blob = await resizePhoto(file);
+      setPhotoBlob(blob);
+      setPhotoPreview(await blobToDataUrl(blob));
+    } catch (err: unknown) {
+      setPhotoBlob(null);
+      setPhotoPreview('');
+      setErrorMessage(err instanceof Error ? err.message : 'Could not use this photo.');
     }
   };
 
@@ -159,6 +182,10 @@ export default function ContactForm() {
       setErrorMessage('Please enter your full name.');
       return;
     }
+    if (!formData.batchYear) {
+      setErrorMessage('Please select your batch (year of leaving).');
+      return;
+    }
     if (!formData.phone.trim()) {
       setErrorMessage('Please enter your mobile number.');
       return;
@@ -175,6 +202,8 @@ export default function ContactForm() {
     setLoading(true);
 
     try {
+      const photoUrl = photoBlob ? await uploadMemberPhoto(photoBlob) : null;
+
       // Secure submission via /api/register route
       const res = await fetch('/api/register', {
         method: 'POST',
@@ -187,6 +216,7 @@ export default function ContactForm() {
           batchYear: formData.batchYear || null,
           phone: formData.phone.trim(),
           agreed: formData.agreed,
+          photoUrl,
         }),
       });
 
@@ -195,7 +225,16 @@ export default function ContactForm() {
         throw new Error(data.error || 'Registration failed.');
       }
 
+      setCardData({
+        fullName: formData.fullName.trim(),
+        relativeName: formData.relativeName.trim() || null,
+        batchYear: formData.batchYear,
+        membershipId: data.membershipId || '',
+        photoUrl: photoPreview || null,
+      });
       setSuccess(true);
+      setPhotoBlob(null);
+      setPhotoPreview('');
       setFormData({
         fullName: '',
         relativeName: '',
@@ -225,12 +264,12 @@ export default function ContactForm() {
           alt="Mahbub College Historic Campus"
           fill
           quality={95}
-          className="object-cover object-center filter brightness-[0.75] contrast-[1.05]"
+          className="object-cover object-center filter contrast-[1.05] brightness-95"
           sizes="100vw"
         />
-        {/* Dark overlay matching Figma Contact_us_background_image (0.85 black fill) */}
-        <div className="absolute inset-0 bg-black/85" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/85 to-black/75" />
+        {/* Light overlay so the campus photo stays visible while the form text remains readable */}
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/45" />
       </div>
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#800000]/20 rounded-full blur-3xl pointer-events-none" />
 
@@ -299,20 +338,48 @@ export default function ContactForm() {
 
           {/* Right Column: Registration Form (Matches Figma Form Register) */}
           <div className="lg:col-span-7 bg-black/40 backdrop-blur-md rounded-[24px] p-6 sm:p-8 lg:p-10 border border-white/10 shadow-2xl">
-            {success ? (
-              <div className="py-12 px-4 text-center flex flex-col items-center justify-center">
-                <CheckCircle2 className="w-16 h-16 text-emerald-400 mb-4 animate-bounce" />
-                <h3 className="text-2xl font-bold text-white mb-2">Registration Successful!</h3>
+            {showLookup ? (
+              <CardLookup onBack={() => setShowLookup(false)} />
+            ) : success ? (
+              <div className="py-4 flex flex-col items-center text-center gap-4">
+                <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+                <h3 className="text-2xl font-bold text-white">Registration Successful!</h3>
                 <p className="text-gray-300 text-base max-w-md leading-relaxed">
-                  Thank you for registering. You have taken a vital step in connecting with the Mahbub College Students Association and supporting our shared heritage.
+                  Welcome to the Mahbub College Students Association. Here is your membership card. A confirmation SMS with your Membership ID is on its way.
                 </p>
+                {cardData && <MemberCardPanel {...cardData} />}
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => setShowLookup(true)}
+                    className="inline-flex items-center gap-2 text-sm  text-red-100 underline  hover:text-white cursor-pointer"
+                  >
+                    <IdCard className="w-5 h-5" />
+                    Already a member? Download your membership card
+                  </button>
+                </div>
+
                 {errorMessage && (
                   <div className="p-4 rounded-xl bg-red-950/80 border border-red-500/40 text-red-200 text-sm flex items-center gap-3">
                     <AlertCircle className="w-5 h-5 shrink-0 text-red-400" />
-                    <span>{errorMessage}</span>
+                    <span>
+                      {errorMessage}
+                      {errorMessage.toLowerCase().includes('already registered') && (
+                        <>
+                          {' '}
+                          <button
+                            type="button"
+                            onClick={() => setShowLookup(true)}
+                            className="underline font-semibold hover:text-white cursor-pointer"
+                          >
+                            Get your membership card
+                          </button>
+                        </>
+                      )}
+                    </span>
                   </div>
                 )}
 
@@ -381,15 +448,16 @@ export default function ContactForm() {
                   </select>
                 </div>
 
-                {/* 5. Batch - Year of Leaving (Dropdown, Optional) */}
+                {/* 5. Batch - Year of Leaving (Dropdown, Mandatory) */}
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">
-                    Batch - Year of Leaving
+                    Batch - Year of Leaving <span className="text-red-400">*</span>
                   </label>
                   <select
                     name="batchYear"
                     value={formData.batchYear}
                     onChange={handleChange}
+                    required
                     className="w-full h-12 px-4 rounded-lg bg-white border border-gray-300 text-gray-900 focus:outline-hidden focus:border-[#800000] focus:ring-1 focus:ring-[#800000] text-sm transition-all cursor-pointer shadow-xs"
                   >
                     <option value="" className="text-gray-500">Select Year</option>
@@ -399,6 +467,25 @@ export default function ContactForm() {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                {/* Profile photo (optional) - shown on the membership card */}
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1.5">
+                    Profile Photo <span className="text-gray-400 font-normal">(optional, shown on your membership card)</span>
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {photoPreview && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={photoPreview} alt="Selected profile" className="w-16 h-16 rounded-lg object-cover border border-white/30" />
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      className="block w-full text-sm text-gray-200 file:mr-4 file:h-10 file:px-4 file:rounded-lg file:border-0 file:bg-white file:text-[#800000] file:font-medium cursor-pointer"
+                    />
+                  </div>
                 </div>
 
                 {/* 6. Mobile Number (Mandatory) + Send OTP Button */}

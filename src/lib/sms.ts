@@ -16,17 +16,16 @@ export function isValidIndianMobile(phone: string): boolean {
   return /^91[5-9]\d{9}$/.test(formatted);
 }
 
-export async function sendOtpSms(phone: string, otp: string): Promise<{ success: boolean; id?: string }> {
+async function sendDltSms(
+  phone: string,
+  message: string,
+  templateId: string
+): Promise<{ success: boolean; id?: string }> {
   const formattedPhone = formatIndianPhone(phone);
-
-  // Exact DLT registered template:
-  // "{otp} is your verification code for App login. Valid for 10 minutes. Do not share. -- Bharat Analytica"
-  const message = `${otp} is your verification code for App login. Valid for 10 minutes. Do not share. -- Bharat Analytica`;
 
   const gatewayUrl = process.env.SMS_GATEWAY_URL || 'http://13.127.107.32/sms/V1/send-sms-api.php';
   const apiKey = process.env.SMS_API_KEY || 'gfJLlF6jqw06RXoW';
-  const senderId = process.env.SMS_SENDER_ID || 'ELEAPP';
-  const templateId = process.env.SMS_DLT_TEMPLATE_ID || '1207177346876816078';
+  const senderId = process.env.SMS_SENDER_ID || 'MC1862';
   const entityId = process.env.SMS_DLT_ENTITY_ID || '1201162562947083464';
 
   const url = new URL(gatewayUrl);
@@ -40,8 +39,7 @@ export async function sendOtpSms(phone: string, otp: string): Promise<{ success:
     format: 'json',
   }).toString();
 
-  // Log in dev environment for convenient debugging
-  console.log(`[SMS Gateway] Sending OTP ${otp} to ${formattedPhone}`);
+  console.log(`[SMS Gateway] Sending SMS (template ${templateId}) to ${formattedPhone}`);
 
   try {
     const res = await fetch(url.toString(), {
@@ -64,4 +62,29 @@ export async function sendOtpSms(phone: string, otp: string): Promise<{ success:
     console.error('[SMS Gateway Error]', errorMsg);
     throw new Error(`Failed to send SMS: ${errorMsg}`);
   }
+}
+
+// DLT template "MC1862 OTP":
+// "{#number#} is your verification code for Mahbub College registration. Valid for 2 minutes. Do not share. -- Bharat Analytica"
+export async function sendOtpSms(phone: string, otp: string): Promise<{ success: boolean; id?: string }> {
+  return sendDltSms(
+    phone,
+    `${otp} is your verification code for Mahbub College registration. Valid for 2 minutes. Do not share. -- Bharat Analytica`,
+    process.env.SMS_DLT_TEMPLATE_ID || '1277179127713145558'
+  );
+}
+
+// DLT template "Membership Response":
+// "Your bond with Mahbub College continues! Welcome to Mahbub College Students Association. Membership ID: MAHBUB-{#number#}- {#number#} — Bharat Analytica"
+// The two variables are the batch year and the member number, e.g. 1999 and 0016.
+export async function sendMembershipSms(
+  phone: string,
+  batchYear: string,
+  memberNumber: string
+): Promise<{ success: boolean; id?: string }> {
+  return sendDltSms(
+    phone,
+    `Your bond with Mahbub College continues! Welcome to Mahbub College Students Association. Membership ID: MAHBUB-${batchYear}- ${memberNumber} — Bharat Analytica`,
+    process.env.SMS_DLT_MEMBERSHIP_TEMPLATE_ID || '1277179189093770271'
+  );
 }

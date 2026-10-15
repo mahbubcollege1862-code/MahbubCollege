@@ -3,6 +3,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { useAutoScroll } from '@/hooks/useAutoScroll';
 import { LegacyBuilder } from '@/types/database';
 
 interface Props {
@@ -35,7 +36,10 @@ export default function LegacyBuildersClient({ builders }: Props) {
     }
   }, [checkScroll]);
 
+  const { pauseFor } = useAutoScroll(scrollContainerRef);
+
   const scroll = (direction: 'left' | 'right') => {
+    pauseFor(2000);
     if (scrollContainerRef.current) {
       const card = scrollContainerRef.current.firstElementChild as HTMLElement | null;
       const scrollAmount = card ? card.offsetWidth + 24 : 304;
@@ -97,7 +101,7 @@ export default function LegacyBuildersClient({ builders }: Props) {
         {/* Carousel Row: 1 full card on mobile, 280x310 on desktop */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-6 overflow-x-auto scrollbar-none scroll-smooth pb-4 -mx-6 px-6 sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12 snap-x snap-mandatory scroll-px-6"
+          className="flex gap-6 overflow-x-auto scrollbar-none pb-4"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {builders.map((builder) => (

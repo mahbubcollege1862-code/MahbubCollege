@@ -1,9 +1,16 @@
 import React from 'react';
 import PageHeroBanner from '@/components/common/PageHeroBanner';
 
+export type LegalBlock =
+  | { type: 'text'; text: string }
+  | { type: 'heading'; text: string }
+  | { type: 'list'; items: string[] };
+
 export interface LegalSection {
   title: string;
-  content: string;
+  /** Plain text, shown as-is. Use `blocks` for headings and bullet lists. */
+  content?: string;
+  blocks?: LegalBlock[];
 }
 
 interface Props {
@@ -37,13 +44,37 @@ export default function LegalPageLayout({
             {sections.map((section, idx) => (
               <div key={idx} className="space-y-3 font-google-sans">
                 {section.title && (
-                  <h2 className="text-gray-900 font-semibold text-2xl sm:text-3xl lg:text-[34px] leading-tight tracking-tight">
+                  <h2 className="text-gray-900 font-bold text-2xl sm:text-3xl lg:text-[34px] leading-tight tracking-tight">
                     {section.title}
                   </h2>
                 )}
-                <div className="text-gray-800 text-[17px] sm:text-[18px] leading-relaxed whitespace-pre-line font-normal">
-                  {section.content}
-                </div>
+                {section.blocks ? (
+                  <div className="space-y-3 text-gray-800 text-[17px] sm:text-[18px] leading-relaxed font-normal">
+                    {section.blocks.map((block, i) => {
+                      if (block.type === 'heading') {
+                        return (
+                          <h3 key={i} className="pt-2 text-gray-900 font-bold text-[19px] sm:text-[20px]">
+                            {block.text}
+                          </h3>
+                        );
+                      }
+                      if (block.type === 'list') {
+                        return (
+                          <ul key={i} className="list-disc pl-6 space-y-1.5 marker:text-[#800000]">
+                            {block.items.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        );
+                      }
+                      return <p key={i}>{block.text}</p>;
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-gray-800 text-[17px] sm:text-[18px] leading-relaxed whitespace-pre-line font-normal">
+                    {section.content}
+                  </div>
+                )}
               </div>
             ))}
 

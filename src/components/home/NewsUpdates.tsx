@@ -2,9 +2,6 @@ import React from 'react';
 import { supabase } from '@/lib/supabase';
 import { NewsUpdate } from '@/types/database';
 import NewsUpdatesClient from './NewsUpdatesClient';
-import { FALLBACK_NEWS } from '@/lib/fallbackData';
-
-export const revalidate = 60; // Dynamic ISR revalidation every 60 seconds
 
 export default async function NewsUpdates() {
   let news: NewsUpdate[] = [];
@@ -20,14 +17,9 @@ export default async function NewsUpdates() {
       console.error('Error fetching news from Supabase:', error.message);
     }
 
-    if (data && data.length > 0) {
-      news = data;
-    } else {
-      news = FALLBACK_NEWS;
-    }
+    news = data ?? [];
   } catch (err) {
     console.error('Exception fetching news:', err);
-    news = FALLBACK_NEWS;
   }
 
   return <NewsUpdatesClient news={news} />;

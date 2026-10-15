@@ -6,9 +6,9 @@ export default function Hero() {
   return (
     <section id="home" className="relative w-full overflow-hidden bg-black">
       {/* HERO MAIN STAGE (Figma: Hero Section - 1:879, w: 1920, h: 816) */}
-      <div className="relative min-h-[640px] lg:h-[816px] w-full flex items-center">
-        {/* Full-bleed Background Photograph from Figma (Hero_section_background.jpg) */}
-        <div className="absolute inset-0 z-0">
+      <div className="relative w-full flex flex-col lg:flex-row lg:items-center lg:min-h-[640px] lg:h-[816px]">
+        {/* Photograph: shown in full above the text on mobile (1920x816), full-bleed background from lg up */}
+        <div className="relative w-full aspect-[1920/816] lg:aspect-auto lg:absolute lg:inset-0 z-0">
           <Image
             src="/hero-bg.jpg"
             alt="Mahbub College Historic Campus"
@@ -19,12 +19,11 @@ export default function Hero() {
             sizes="100vw"
           />
           {/* Subtle gradient overlay to ensure text contrast against campus architecture */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent lg:hidden" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-transparent hidden lg:block" />
         </div>
 
         {/* Content Container (Matches Figma Frame 1000001831: w=805, h=461) */}
-        <div className="relative z-10 max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-16 xl:px-[120px] 2xl:px-[240px] w-full py-16 lg:py-0">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full py-10 sm:py-12 lg:py-0">
           <div className="max-w-[805px] flex flex-col justify-center">
             {/* 1. Eyebrow Label (Figma: Google Sans Flex, 25px, Regular, 31.3px line-height, White) */}
             <p className="font-google-sans text-white text-lg sm:text-xl lg:text-[25px] font-normal leading-[31.3px] tracking-normal mb-3 sm:mb-4">
@@ -53,14 +52,6 @@ export default function Hero() {
                 className="w-[128px] h-[54px] sm:h-[59px] rounded-[40px] bg-[#800000] hover:bg-[#680000] active:scale-[0.97] transition-all flex items-center justify-center font-google-sans font-semibold text-white text-[18px] sm:text-[20px] leading-[19px] shadow-lg shadow-black/40 hover:shadow-[#800000]/30"
               >
                 Join Us
-              </Link>
-
-              {/* Secondary CTA - Download App (Figma Frame 8: 198x59, r:40, bg:white/10, border:white/27, 20px w600) */}
-              <Link
-                href="/#contact"
-                className="w-[180px] sm:w-[198px] h-[54px] sm:h-[59px] rounded-[40px] bg-white/10 hover:bg-white/20 border border-white/[0.27] hover:border-white/50 backdrop-blur-md active:scale-[0.97] transition-all flex items-center justify-center font-google-sans font-semibold text-white text-[18px] sm:text-[20px] leading-[19px] shadow-lg shadow-black/40"
-              >
-                Download App
               </Link>
             </div>
           </div>

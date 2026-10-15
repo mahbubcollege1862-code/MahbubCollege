@@ -5,9 +5,12 @@ import FormerStudents from '@/components/home/FormerStudents';
 import Heritage from '@/components/home/Heritage';
 import LegacyBuilders from '@/components/home/LegacyBuilders';
 import Leaders from '@/components/home/Leaders';
+import Guides from '@/components/home/Guides';
 import NewsUpdates from '@/components/home/NewsUpdates';
 import GallerySection from '@/components/home/GallerySection';
 import ContactForm from '@/components/home/ContactForm';
+
+export const revalidate = 60; // ISR: refresh Supabase-driven sections every 60 seconds
 
 export default function Home() {
   return (
@@ -24,20 +27,21 @@ export default function Home() {
       {/* 4. Former Students Who Made Us Proud (Figma: 1:154) */}
       <FormerStudents />
 
-      {/* 5. Our Heritage, Our Pride (Figma: 1:231) */}
-      <Heritage />
-
       {/* 6. The People Who Built Our Legacy (Figma: 1:275) */}
       <LegacyBuilders />
 
       {/* 7. The Leaders Who Shaped Our Institution & The People Who Guided Our Institution (Figma: 1:343 & 40:1769) */}
       <Leaders />
+      <Guides />
 
-      {/* 8. News and Updates (Figma: 4:344) */}
-      <NewsUpdates />
+      {/* 5. Our Heritage, Our Pride (Figma: 1:231) */}
+      <Heritage />
 
       {/* 9. Gallery (Figma: 1:489) */}
       <GallerySection />
+
+      {/* 8. News and Updates (Figma: 4:344) */}
+      <NewsUpdates />
 
       {/* 10. Contact / Alumni Registration Form (Figma: 1:525) */}
       <ContactForm />

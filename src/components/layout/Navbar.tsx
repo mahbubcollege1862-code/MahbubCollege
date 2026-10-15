@@ -16,10 +16,9 @@ const navItems: NavItem[] = [
   { label: 'Home', href: '/#home', id: 'home' },
   { label: 'About Us', href: '/#about', id: 'about' },
   { label: 'Former Students', href: '/#alumni', id: 'alumni' },
-  { label: 'Our Pride', href: '/#heritage', id: 'heritage' },
-  { label: 'News & Updates', href: '/#news', id: 'news' },
+  { label: 'Our Legacy', href: '/#legacy', id: 'legacy' },
   { label: 'Gallery', href: '/gallery', id: 'gallery' },
-  { label: 'Contact Us', href: '/#contact', id: 'contact' },
+  { label: 'Contact Us', href: '/#footer', id: 'footer' },
 ];
 
 export default function Navbar() {
@@ -40,17 +39,17 @@ export default function Navbar() {
     }
 
     // On home page: scroll spy tracking sections
-    const sectionIds = ['home', 'about', 'alumni', 'heritage', 'news', 'contact'];
+    const sectionIds = ['home', 'about', 'alumni', 'legacy', 'contact', 'footer'];
 
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
 
-      // Bottom of page activates contact
+      // Bottom of page activates the footer (Contact Us)
       if (
         window.innerHeight + window.scrollY >=
         document.documentElement.scrollHeight - 120
       ) {
-        setActiveSection('contact');
+        setActiveSection('footer');
         return;
       }
 
@@ -83,8 +82,8 @@ export default function Navbar() {
           : 'border-b border-gray-100/90 py-2.5 sm:py-3'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-12">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo Brand */}
           <Link href="/" className="flex items-center group">
             <Image
@@ -94,7 +93,7 @@ export default function Navbar() {
               height={45}
               unoptimized
               priority
-              className="h-9 sm:h-10 w-auto object-contain group-hover:opacity-95 transition-opacity"
+              className="h-11 sm:h-14 w-auto object-contain group-hover:opacity-95 transition-opacity"
             />
           </Link>
 

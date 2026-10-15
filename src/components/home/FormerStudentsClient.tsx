@@ -3,6 +3,7 @@
 import React, { useRef } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAutoScroll } from '@/hooks/useAutoScroll';
 import { FormerStudent } from '@/types/database';
 
 interface Props {
@@ -12,7 +13,10 @@ interface Props {
 export default function FormerStudentsClient({ students }: Props) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const { pauseFor } = useAutoScroll(scrollContainerRef);
+
   const scroll = (direction: 'left' | 'right') => {
+    pauseFor(2000);
     if (scrollContainerRef.current) {
       const card = scrollContainerRef.current.firstElementChild as HTMLElement | null;
       const scrollAmount = card ? card.offsetWidth + 20 : 284;
@@ -64,7 +68,7 @@ export default function FormerStudentsClient({ students }: Props) {
         {/* Carousel Row (Matches Figma Frame 1000001826: 1 card on mobile, 264x370 on desktop) */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-5 sm:gap-6 overflow-x-auto scrollbar-none scroll-smooth pb-6 -mx-6 px-6 sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12 snap-x snap-mandatory scroll-px-6"
+          className="flex gap-5 sm:gap-6 overflow-x-auto scrollbar-none pb-6"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {students.map((student) => (
@@ -80,7 +84,7 @@ export default function FormerStudentsClient({ students }: Props) {
                   fill
                   unoptimized
                   sizes="(max-width: 640px) 100vw, 264px"
-                  className="object-cover object-center group-hover:scale-105 transition-transform duration-500 filter contrast-[1.02]"
+                  className="object-cover object-top group-hover:scale-105 transition-transform duration-500 filter contrast-[1.02]"
                 />
               )}
 

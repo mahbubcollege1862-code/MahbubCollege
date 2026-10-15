@@ -33,7 +33,7 @@ const STATS: StatItem[] = [
 export default function StaticBanner() {
   return (
     <section className="relative w-full bg-[#800000] border-t border-red-950/20 z-20">
-      <div className="max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-16 xl:px-[120px] 2xl:px-[240px] py-6 lg:py-0 lg:h-[120px] flex items-center">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-6 lg:py-0 lg:h-[120px] flex items-center">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 xl:gap-12 w-full items-center justify-between">
           {STATS.map((stat) => (
             <div key={stat.label} className="flex items-center gap-3.5 sm:gap-4 shrink-0">
