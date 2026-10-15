@@ -68,7 +68,7 @@ export default function Footer() {
             {/* Social Icons (Matches Figma: 32x32 maroon round buttons rgb(128,0,0)) */}
             <div className="flex items-center gap-3 pt-3">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/mahbubcollege/"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Instagram"
@@ -80,7 +80,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/mahbubcollege/"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Facebook"
@@ -92,10 +92,10 @@ export default function Footer() {
               </a>
 
               <a
-                href="https://twitter.com"
+                href="https://x.com/mahbubcollegesa"
                 target="_blank"
                 rel="noreferrer"
-                aria-label="Twitter"
+                aria-label="X (Twitter)"
                 className="w-9 h-9 rounded-full bg-[#800000] hover:bg-red-800 flex items-center justify-center transition-all duration-300 shadow-sm hover:scale-105"
               >
                 <div className="relative w-4 h-4">
@@ -104,7 +104,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@mahbubcollege"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="YouTube"
