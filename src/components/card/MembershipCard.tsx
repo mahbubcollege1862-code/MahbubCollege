@@ -132,9 +132,6 @@ const MembershipCard = forwardRef<SVGSVGElement, MembershipCardData & { classNam
           <clipPath id="card_photo_clip">
             <rect x={PHOTO_BOX.x} y={PHOTO_BOX.y} width={PHOTO_BOX.size} height={PHOTO_BOX.size} rx="4.5" />
           </clipPath>
-          <filter id="photo_blur" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="4" />
-          </filter>
         </defs>
 
         <g clipPath="url(#card_clip)">
@@ -174,28 +171,15 @@ const MembershipCard = forwardRef<SVGSVGElement, MembershipCardData & { classNam
 
           {/* Photo */}
           {photoUrl ? (
-            <g clipPath="url(#card_photo_clip)">
-              {/* Blurred, enlarged copy fills the fixed frame behind the photo */}
-              <image
-                href={photoUrl}
-                x={PHOTO_BOX.x - 12}
-                y={PHOTO_BOX.y - 12}
-                width={PHOTO_BOX.size + 24}
-                height={PHOTO_BOX.size + 24}
-                preserveAspectRatio="xMidYMid slice"
-                filter="url(#photo_blur)"
-              />
-              <rect x={PHOTO_BOX.x} y={PHOTO_BOX.y} width={PHOTO_BOX.size} height={PHOTO_BOX.size} fill="#000000" fillOpacity="0.25" />
-              {/* The whole photo, uncropped, on top */}
-              <image
-                href={photoUrl}
-                x={PHOTO_BOX.x}
-                y={PHOTO_BOX.y}
-                width={PHOTO_BOX.size}
-                height={PHOTO_BOX.size}
-                preserveAspectRatio="xMidYMid meet"
-              />
-            </g>
+            <image
+              href={photoUrl}
+              x={PHOTO_BOX.x}
+              y={PHOTO_BOX.y}
+              width={PHOTO_BOX.size}
+              height={PHOTO_BOX.size}
+              preserveAspectRatio="xMidYMid slice"
+              clipPath="url(#card_photo_clip)"
+            />
           ) : (
             <g dangerouslySetInnerHTML={{ __html: CARD_PLACEHOLDER }} />
           )}

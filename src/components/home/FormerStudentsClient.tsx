@@ -74,29 +74,28 @@ export default function FormerStudentsClient({ students }: Props) {
           {students.map((student) => (
             <div
               key={student.id || student.name}
-              className="relative w-[calc(100vw-48px)] sm:w-[264px] h-[390px] sm:h-[370px] shrink-0 snap-start rounded-[14px] overflow-hidden group shadow-md hover:shadow-2xl transition-all duration-300 bg-gray-900 border border-white/25"
+              className="w-[calc(100vw-48px)] sm:w-[265px] lg:w-[280px] shrink-0 snap-start group flex flex-col"
             >
-              {/* Card Photo from Supabase */}
-              {student.photo_url && (
-                <Image
-                  src={student.photo_url}
-                  alt={student.name}
-                  fill
-                  unoptimized
-                  sizes="(max-width: 640px) 100vw, 264px"
-                  className="object-cover object-top group-hover:scale-105 transition-transform duration-500 filter contrast-[1.02]"
-                />
-              )}
+              {/* Photo (same size as the Leaders and Guides cards) */}
+              <div className="relative w-full h-[340px] sm:h-[290px] lg:h-[310px] rounded-[14px] overflow-hidden bg-black/20 border border-white shadow-md group-hover:shadow-xl transition-shadow duration-300">
+                {student.photo_url && (
+                  <Image
+                    src={student.photo_url}
+                    alt={student.name}
+                    fill
+                    unoptimized
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 265px, 280px"
+                    className="object-cover object-top group-hover:scale-103 transition-transform duration-500 filter contrast-[1.02]"
+                  />
+                )}
+              </div>
 
-              {/* Dark Gradient Overlay for Typography Contrast */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent" />
-
-              {/* Card Meta Content (Matches Figma Frame 1000001742) */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 font-google-sans z-10">
-                <h3 className="text-white font-semibold text-base sm:text-[18px] leading-snug drop-shadow-sm group-hover:text-red-200 transition-colors">
+              {/* Name and title below the photo */}
+              <div className="mt-3 font-google-sans">
+                <h3 className="text-white font-semibold text-[17px] sm:text-[19px] leading-snug break-words group-hover:text-red-200 transition-colors">
                   {student.name}
                 </h3>
-                <p className="text-gray-300 text-xs sm:text-[13px] font-normal leading-tight mt-1 line-clamp-2">
+                <p className="text-white/80 text-sm sm:text-[14px] font-normal leading-snug break-words mt-1">
                   {student.title}
                 </p>
               </div>

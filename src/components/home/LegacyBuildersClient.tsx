@@ -123,10 +123,10 @@ export default function LegacyBuildersClient({ builders }: Props) {
 
               {/* Text Container */}
               <div className="mt-3 font-google-sans">
-                <h3 className="text-gray-900 font-semibold text-[17px] sm:text-[19px] leading-snug line-clamp-1 group-hover:text-[#800000] transition-colors">
+                <h3 className="text-gray-900 font-semibold text-[17px] sm:text-[19px] leading-snug break-words group-hover:text-[#800000] transition-colors">
                   {builder.name}
                 </h3>
-                <p className="text-gray-600 text-sm sm:text-[14px] font-normal leading-snug line-clamp-1 mt-1">
+                <p className="text-gray-600 text-sm sm:text-[14px] font-normal leading-snug break-words mt-1">
                   {builder.title}
                 </p>
               </div>

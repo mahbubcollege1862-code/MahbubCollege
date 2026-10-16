@@ -15,11 +15,11 @@ export default function Hero() {
             fill
             priority
             quality={95}
-            className="object-cover object-center filter contrast-[1.05] brightness-95"
+            className="object-cover object-center filter contrast-[1.05]"
             sizes="100vw"
           />
           {/* Subtle gradient overlay to ensure text contrast against campus architecture */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-transparent hidden lg:block" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/10 to-transparent hidden lg:block" />
         </div>
 
         {/* Content Container (Matches Figma Frame 1000001831: w=805, h=461) */}

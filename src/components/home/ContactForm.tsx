@@ -7,7 +7,8 @@ import { CheckCircle2, AlertCircle, Loader2, Users, BookOpen, School, IdCard } f
 import MemberCardPanel from '@/components/card/MemberCardPanel';
 import type { MembershipCardData } from '@/components/card/MembershipCard';
 import CardLookup from './CardLookup';
-import { blobToDataUrl, resizePhoto, uploadMemberPhoto } from '@/lib/photoUpload';
+import { blobToDataUrl, uploadMemberPhoto, validatePhotoFile } from '@/lib/photoUpload';
+import PhotoCropper from './PhotoCropper';
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -26,6 +27,8 @@ export default function ContactForm() {
   const [showLookup, setShowLookup] = useState(false);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [photoPreview, setPhotoPreview] = useState('');
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [cropping, setCropping] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   // OTP Verification States
@@ -95,19 +98,30 @@ export default function ContactForm() {
     }
   };
 
-  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = ''; // allow choosing the same file again
     if (!file) return;
     setErrorMessage('');
     try {
-      const blob = await resizePhoto(file);
-      setPhotoBlob(blob);
-      setPhotoPreview(await blobToDataUrl(blob));
+      validatePhotoFile(file);
+      setPhotoFile(file);
+      setCropping(true);
     } catch (err: unknown) {
-      setPhotoBlob(null);
-      setPhotoPreview('');
       setErrorMessage(err instanceof Error ? err.message : 'Could not use this photo.');
     }
+  };
+
+  const handlePhotoCropped = async (blob: Blob) => {
+    setPhotoBlob(blob);
+    setPhotoPreview(await blobToDataUrl(blob));
+    setCropping(false);
+  };
+
+  const removePhoto = () => {
+    setPhotoBlob(null);
+    setPhotoPreview('');
+    setPhotoFile(null);
   };
 
   const handleSendOtp = async () => {
@@ -479,12 +493,24 @@ export default function ContactForm() {
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={photoPreview} alt="Selected profile" className="w-16 h-16 rounded-lg object-cover border border-white/30" />
                     )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoChange}
-                      className="block w-full text-sm text-gray-200 file:mr-4 file:h-10 file:px-4 file:rounded-lg file:border-0 file:bg-white file:text-[#800000] file:font-medium cursor-pointer"
-                    />
+                    <div className="flex-1 min-w-0">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoChange}
+                        className="block w-full text-sm text-gray-200 file:mr-4 file:h-10 file:px-4 file:rounded-lg file:border-0 file:bg-white file:text-[#800000] file:font-medium cursor-pointer"
+                      />
+                      {photoPreview && (
+                        <div className="mt-2 flex gap-4 text-sm">
+                          <button type="button" onClick={() => setCropping(true)} className="text-red-300 underline underline-offset-2 hover:text-white cursor-pointer">
+                            Adjust photo
+                          </button>
+                          <button type="button" onClick={removePhoto} className="text-gray-300 underline underline-offset-2 hover:text-white cursor-pointer">
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -658,6 +684,9 @@ export default function ContactForm() {
           </div>
         </div>
       </div>
+      {cropping && photoFile && (
+        <PhotoCropper file={photoFile} onCancel={() => setCropping(false)} onDone={handlePhotoCropped} />
+      )}
     </section>
   );
 }
