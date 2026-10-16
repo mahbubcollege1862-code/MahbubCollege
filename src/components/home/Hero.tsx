@@ -10,7 +10,7 @@ export default function Hero() {
         {/* Photograph: shown in full above the text on mobile (1920x816), full-bleed background from lg up */}
         <div className="relative w-full aspect-[1920/816] lg:aspect-auto lg:absolute lg:inset-0 z-0">
           <Image
-            src="/hero-bg.jpg"
+            src="/hero-campus.jpg"
             alt="Mahbub College Historic Campus"
             fill
             priority

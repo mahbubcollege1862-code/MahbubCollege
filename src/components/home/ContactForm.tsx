@@ -289,7 +289,7 @@ export default function ContactForm() {
       {/* Full-bleed Banner Background Image from Figma (matching hero section) */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/hero-bg.jpg"
+          src="/hero-campus.jpg"
           alt="Mahbub College Historic Campus"
           fill
           quality={95}

@@ -17,7 +17,7 @@ export default function PageHeroBanner({
       {/* Exact Home Page Background Photograph */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/hero-bg.jpg"
+          src="/hero-campus.jpg"
           alt="Mahbub College Historic Campus"
           fill
           priority
