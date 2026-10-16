@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import MemberCardPanel from '@/components/card/MemberCardPanel';
 import type { MembershipCardData } from '@/components/card/MembershipCard';
+import TurnstileWidget, { turnstileEnabled } from './TurnstileWidget';
 
 interface Props {
   onBack: () => void;
@@ -20,6 +21,8 @@ export default function CardLookup({ onBack }: Props) {
   const [cooldown, setCooldown] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [member, setMember] = useState<MembershipCardData | null>(null);
 
   useEffect(() => {
@@ -43,9 +46,13 @@ export default function CardLookup({ onBack }: Props) {
       setError('Please enter a valid 10-digit mobile number.');
       return;
     }
+    if (turnstileEnabled && !captchaToken) {
+      setError('Please complete the security check first.');
+      return;
+    }
     setBusy(true);
     try {
-      const { ok, data } = await post('/api/otp/send', { phone });
+      const { ok, data } = await post('/api/otp/send', { phone, turnstileToken: captchaToken });
       if (!ok || !data.success) {
         setError(data.error || 'Failed to send verification code.');
         if (data.cooldownRemaining) setCooldown(data.cooldownRemaining);
@@ -57,6 +64,8 @@ export default function CardLookup({ onBack }: Props) {
       setError('Network error. Unable to send verification code.');
     } finally {
       setBusy(false);
+      setCaptchaToken('');
+      setCaptchaKey((k) => k + 1);
     }
   };
 
@@ -137,6 +146,8 @@ export default function CardLookup({ onBack }: Props) {
           {cooldown > 0 ? `Resend in ${cooldown}s` : otpSent ? 'Resend OTP' : 'Send OTP'}
         </button>
       </div>
+
+      {turnstileEnabled && <TurnstileWidget onToken={setCaptchaToken} resetKey={captchaKey} />}
 
       {otpSent && (
         <div className="flex gap-3">

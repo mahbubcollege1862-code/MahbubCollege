@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { formatIndianPhone, isValidIndianMobile, sendOtpSms } from '@/lib/sms';
 import { requestOtp } from '@/lib/otpStore';
+import { checkOtpRateLimit, getClientIp, hashIp, logOtpSend } from '@/lib/rateLimit';
+import { verifyTurnstile } from '@/lib/turnstile';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { phone } = body;
+    const { phone, turnstileToken } = body;
 
     if (!phone || typeof phone !== 'string') {
       return NextResponse.json(
@@ -22,6 +24,23 @@ export async function POST(req: Request) {
     }
 
     const formattedPhone = formatIndianPhone(phone);
+    const ip = getClientIp(req);
+
+    // 1. Bot check (only when Cloudflare Turnstile is configured)
+    if (!(await verifyTurnstile(turnstileToken, ip))) {
+      return NextResponse.json(
+        { success: false, error: 'Please complete the security check and try again.', captchaFailed: true },
+        { status: 400 }
+      );
+    }
+
+    // 2. Per-visitor, per-number and global limits
+    const ipHash = hashIp(ip);
+    const limit = await checkOtpRateLimit(ipHash, formattedPhone);
+    if (!limit.ok) {
+      return NextResponse.json({ success: false, error: limit.message }, { status: 429 });
+    }
+
     const otpResult = await requestOtp(formattedPhone);
 
     if (!otpResult.success || !otpResult.otp) {
@@ -35,7 +54,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Dispatch SMS via Bharat Analytica Gateway
+    // Count this SMS against the limits, then dispatch it via the Bharat Analytica gateway
+    await logOtpSend(ipHash, formattedPhone);
     await sendOtpSms(formattedPhone, otpResult.otp);
 
     return NextResponse.json({

@@ -3,10 +3,11 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
-import { CheckCircle2, AlertCircle, Loader2, Users, BookOpen, School, IdCard } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, Users, BookOpen, School } from 'lucide-react';
 import MemberCardPanel from '@/components/card/MemberCardPanel';
 import type { MembershipCardData } from '@/components/card/MembershipCard';
 import CardLookup from './CardLookup';
+import TurnstileWidget, { turnstileEnabled } from './TurnstileWidget';
 import DateField, { dmyToIso } from './DateField';
 import { blobToDataUrl, uploadMemberPhoto, validatePhotoFile } from '@/lib/photoUpload';
 import PhotoCropper from './PhotoCropper';
@@ -41,6 +42,8 @@ export default function ContactForm() {
   const [otpError, setOtpError] = useState('');
   const [otpSuccessMessage, setOtpSuccessMessage] = useState('');
   const [cooldown, setCooldown] = useState(0);
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   // 60-second cooldown timer
   React.useEffect(() => {
@@ -134,13 +137,17 @@ export default function ContactForm() {
       setOtpError('Please enter a valid 10-digit mobile number.');
       return;
     }
+    if (turnstileEnabled && !captchaToken) {
+      setOtpError('Please complete the security check first.');
+      return;
+    }
 
     setOtpLoading(true);
     try {
       const res = await fetch('/api/otp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: formData.phone }),
+        body: JSON.stringify({ phone: formData.phone, turnstileToken: captchaToken }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -157,6 +164,9 @@ export default function ContactForm() {
       setOtpError('Network error. Unable to send verification code.');
     } finally {
       setOtpLoading(false);
+      // a security-check token works only once: ask for a fresh one for the next attempt
+      setCaptchaToken('');
+      setCaptchaKey((k) => k + 1);
     }
   };
 
@@ -376,7 +386,6 @@ export default function ContactForm() {
                     onClick={() => setShowLookup(true)}
                     className="inline-flex items-center gap-2 text-sm  text-red-100 underline  hover:text-white cursor-pointer"
                   >
-                    <IdCard className="w-5 h-5" />
                     Already a member? Download your membership card
                   </button>
                 </div>
@@ -575,6 +584,12 @@ export default function ContactForm() {
                       </button>
                     )}
                   </div>
+
+                  {!isPhoneVerified && turnstileEnabled && (
+                    <div className="mt-3">
+                      <TurnstileWidget onToken={setCaptchaToken} resetKey={captchaKey} />
+                    </div>
+                  )}
 
                   {isPhoneVerified && (
                     <div className="mt-2 flex items-center gap-2 text-xs font-medium text-emerald-400">
