@@ -44,7 +44,10 @@ export async function POST(req: Request) {
       cooldown: 60,
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Failed to send verification SMS.';
-    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
+    console.error('[OTP Send Error]', err instanceof Error ? err.message : err);
+    return NextResponse.json(
+      { success: false, error: 'Unable to send the verification code right now. Please try again shortly.' },
+      { status: 500 }
+    );
   }
 }

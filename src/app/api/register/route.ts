@@ -15,6 +15,20 @@ export async function POST(req: Request) {
       );
     }
 
+    // Reject oversized or malformed input before it reaches the database
+    const tooLong = (v: unknown, max: number) => typeof v === 'string' && v.length > max;
+    if (
+      tooLong(fullName, 100) ||
+      tooLong(relativeName, 100) ||
+      tooLong(branch, 100) ||
+      tooLong(phone, 20) ||
+      (relativeName != null && typeof relativeName !== 'string') ||
+      (branch != null && typeof branch !== 'string') ||
+      (dob != null && !(typeof dob === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dob)))
+    ) {
+      return NextResponse.json({ success: false, error: 'Please check the details you entered.' }, { status: 400 });
+    }
+
     if (!phone || typeof phone !== 'string' || !phone.trim()) {
       return NextResponse.json(
         { success: false, error: 'Mobile number is required.' },
@@ -98,8 +112,10 @@ export async function POST(req: Request) {
       membershipId: data?.membership_id,
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'An error occurred during registration.';
-    console.error('[Register API Error]', errorMsg);
-    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
+    console.error('[Register API Error]', err instanceof Error ? err.message : err);
+    return NextResponse.json(
+      { success: false, error: 'Registration failed. Please try again.' },
+      { status: 500 }
+    );
   }
 }

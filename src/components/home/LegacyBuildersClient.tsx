@@ -110,14 +110,14 @@ export default function LegacyBuildersClient({ builders }: Props) {
               className="w-[calc(100vw-48px)] sm:w-[265px] lg:w-[280px] shrink-0 snap-start group flex flex-col"
             >
               {/* Image Container: Full height proportion on mobile */}
-              <div className="relative w-full h-[340px] sm:h-[290px] lg:h-[310px] rounded-[14px] overflow-hidden bg-white shadow-xs group-hover:shadow-md transition-all duration-300 border border-gray-300">
+              <div className="relative w-full aspect-[5/6] rounded-[14px] overflow-hidden bg-white shadow-xs group-hover:shadow-md transition-all duration-300 border border-gray-300">
                 <Image
                   src={builder.photo_url}
                   alt={builder.name}
                   fill
                   unoptimized
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 265px, 280px"
-                  className="object-cover object-top group-hover:scale-103 transition-transform duration-500 filter contrast-[1.02]"
+                  className="object-contain object-top group-hover:scale-103 transition-transform duration-500 filter contrast-[1.02]"
                 />
               </div>
 

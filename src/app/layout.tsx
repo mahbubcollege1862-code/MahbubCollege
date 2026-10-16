@@ -3,13 +3,15 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { CONTACT, SITE_URL, SOCIAL_LINKS } from '@/lib/site';
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
 });
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mahbubcollege.org';
+const siteUrl = SITE_URL;
+const socialProfiles = Object.values(SOCIAL_LINKS);
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -48,7 +50,7 @@ export const metadata: Metadata = {
   publisher: 'Mahbub College Students Association',
   category: 'education',
   alternates: {
-    canonical: siteUrl,
+    canonical: '/',
   },
   openGraph: {
     type: 'website',
@@ -60,7 +62,7 @@ export const metadata: Metadata = {
       'Official portal of Mahbub College (Mahboob College), Secunderabad, Hyderabad, India. Founded in 1862. Reconnect, relive memories, and support our heritage.',
     images: [
       {
-        url: '/hero-bg.jpg',
+        url: '/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Mahbub College Historic Campus Secunderabad Hyderabad India',
@@ -72,7 +74,9 @@ export const metadata: Metadata = {
     title: 'Mahbub College (Mahboob College) Secunderabad | Estd. 1862',
     description:
       'Official portal of Mahbub College, Secunderabad, Hyderabad, India. Established 1862. Reconnect with fellow former students.',
-    images: ['/hero-bg.jpg'],
+    site: '@mahbubcollegesa',
+    creator: '@mahbubcollegesa',
+    images: ['/og-image.jpg'],
   },
   robots: {
     index: true,
@@ -87,7 +91,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/logo.svg',
-    apple: '/logo.svg',
+    apple: '/apple-touch-icon.png',
   },
   other: {
     'geo.region': 'IN-TG',
@@ -122,7 +126,9 @@ const jsonLd = {
       ],
       url: siteUrl,
       logo: `${siteUrl}/logo.svg`,
-      image: `${siteUrl}/hero-bg.jpg`,
+      image: `${siteUrl}/og-image.jpg`,
+      telephone: CONTACT.telephone,
+      email: CONTACT.email,
       description:
         'Mahbub College (also spelled Mahboob College) is a historic educational institution established in 1862 in Secunderabad, Hyderabad, Telangana, India. Founded by visionary philanthropist P. Somasundaram Mudaliar and supported by Asaf Jah VI Mir Mahbub Ali Khan. Famous as the historic venue where Swami Vivekananda delivered his first public lecture in Hyderabad in 1893.',
       foundingDate: '1862',
@@ -146,7 +152,16 @@ const jsonLd = {
       },
       sameAs: [
         'https://en.wikipedia.org/wiki/Mahbub_College_High_School',
+        ...socialProfiles,
       ],
+      contactPoint: {
+        '@type': 'ContactPoint',
+        contactType: 'customer support',
+        telephone: CONTACT.telephone,
+        email: CONTACT.email,
+        areaServed: 'IN',
+        availableLanguage: ['English', 'Telugu', 'Hindi', 'Urdu'],
+      },
       hasPart: [
         { '@type': 'EducationalOrganization', name: 'Anglo Vernacular High School' },
         { '@type': 'EducationalOrganization', name: 'Mahbub Junior College' },
@@ -170,6 +185,10 @@ const jsonLd = {
       name: 'Mahbub College Students Association',
       parentOrganization: { '@id': `${siteUrl}/#institution` },
       url: siteUrl,
+      logo: `${siteUrl}/logo.svg`,
+      telephone: CONTACT.telephone,
+      email: CONTACT.email,
+      sameAs: socialProfiles,
       description:
         'Association uniting alumni and former students of Mahbub College across generations.',
     },
@@ -182,7 +201,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} scroll-smooth`}>
+    <html lang="en-IN" className={`${inter.variable} scroll-smooth`}>
       <head>
         <script
           type="application/ld+json"

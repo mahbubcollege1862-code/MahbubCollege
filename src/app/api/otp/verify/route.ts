@@ -40,7 +40,10 @@ export async function POST(req: Request) {
       message: 'Mobile number verified successfully.',
     });
   } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : 'Failed to verify code.';
-    return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
+    console.error('[OTP Verify Error]', err instanceof Error ? err.message : err);
+    return NextResponse.json(
+      { success: false, error: 'Unable to verify the code right now. Please try again.' },
+      { status: 500 }
+    );
   }
 }

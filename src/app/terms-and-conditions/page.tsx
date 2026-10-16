@@ -3,7 +3,8 @@ import type { Metadata } from 'next';
 import LegalPageLayout, { LegalSection } from '@/components/legal/LegalPageLayout';
 
 export const metadata: Metadata = {
-  title: 'Terms & Conditions | Mahbub College Students Association',
+  title: 'Terms & Conditions',
+  alternates: { canonical: '/terms-and-conditions' },
   description:
     'Official Terms & Conditions of MahbubCollege Students Association, Secunderabad.',
 };

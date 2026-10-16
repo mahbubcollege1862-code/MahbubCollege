@@ -3,7 +3,8 @@ import type { Metadata } from 'next';
 import LegalPageLayout, { LegalSection } from '@/components/legal/LegalPageLayout';
 
 export const metadata: Metadata = {
-  title: 'Account Deletion Policy | Mahbub College Students Association',
+  title: 'Account Deletion Policy',
+  alternates: { canonical: '/delete-account' },
   description:
     'Official Account Deletion Policy and deletion request procedure of MahbubCollege Students Association (MCSA), Secunderabad.',
 };

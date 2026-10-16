@@ -3,7 +3,8 @@ import type { Metadata } from 'next';
 import LegalPageLayout, { LegalSection } from '@/components/legal/LegalPageLayout';
 
 export const metadata: Metadata = {
-  title: 'Data Security | Mahbub College Students Association',
+  title: 'Data Security',
+  alternates: { canonical: '/data-security' },
   description:
     'Official Data Security safeguards of MahbubCollege Students Association, Secunderabad.',
 };

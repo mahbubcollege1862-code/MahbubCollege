@@ -7,6 +7,7 @@ import { CheckCircle2, AlertCircle, Loader2, Users, BookOpen, School, IdCard } f
 import MemberCardPanel from '@/components/card/MemberCardPanel';
 import type { MembershipCardData } from '@/components/card/MembershipCard';
 import CardLookup from './CardLookup';
+import DateField, { dmyToIso } from './DateField';
 import { blobToDataUrl, uploadMemberPhoto, validatePhotoFile } from '@/lib/photoUpload';
 import PhotoCropper from './PhotoCropper';
 
@@ -196,6 +197,10 @@ export default function ContactForm() {
       setErrorMessage('Please enter your full name.');
       return;
     }
+    if (formData.dob && !dmyToIso(formData.dob)) {
+      setErrorMessage('Please enter your date of birth as dd/mm/yyyy, for example 15/03/1990.');
+      return;
+    }
     if (!formData.batchYear) {
       setErrorMessage('Please select your batch (year of leaving).');
       return;
@@ -225,7 +230,7 @@ export default function ContactForm() {
         body: JSON.stringify({
           fullName: formData.fullName.trim(),
           relativeName: formData.relativeName.trim() || null,
-          dob: formData.dob || null,
+          dob: dmyToIso(formData.dob),
           branch: formData.branch || null,
           batchYear: formData.batchYear || null,
           phone: formData.phone.trim(),
@@ -433,11 +438,10 @@ export default function ContactForm() {
                   <label className="block text-sm font-medium text-white mb-1.5">
                     Date of Birth
                   </label>
-                  <input
-                    type="date"
+                  <DateField
                     name="dob"
                     value={formData.dob}
-                    onChange={handleChange}
+                    onChange={(text) => setFormData((prev) => ({ ...prev, dob: text }))}
                     className="w-full h-12 px-4 rounded-lg bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-hidden focus:border-[#800000] focus:ring-1 focus:ring-[#800000] text-sm transition-all shadow-xs"
                   />
                 </div>

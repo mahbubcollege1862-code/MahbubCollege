@@ -114,14 +114,14 @@ export default function LeadersClient({ headmasters }: Props) {
                   key={leader.id || leader.name}
                   className="w-[calc(100vw-48px)] sm:w-[265px] lg:w-[280px] shrink-0 snap-start group flex flex-col"
                 >
-                  <div className="relative w-full h-[340px] sm:h-[290px] lg:h-[310px] rounded-[14px] overflow-hidden bg-gray-50 shadow-xs group-hover:shadow-md transition-all duration-300 border border-gray-200">
+                  <div className="relative w-full aspect-[5/6] rounded-[14px] overflow-hidden bg-gray-50 shadow-xs group-hover:shadow-md transition-all duration-300 border border-gray-200">
                     <Image
                       src={leader.photo_url}
                       alt={leader.name}
                       fill
                       unoptimized
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 265px, 280px"
-                      className="object-cover object-top group-hover:scale-103 transition-transform duration-500 filter contrast-[1.02]"
+                      className="object-contain object-top group-hover:scale-103 transition-transform duration-500 filter contrast-[1.02]"
                     />
                   </div>
                   <div className="mt-3 font-google-sans">

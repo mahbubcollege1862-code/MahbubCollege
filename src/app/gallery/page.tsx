@@ -8,7 +8,8 @@ import PageHeroBanner from '@/components/common/PageHeroBanner';
 export const revalidate = 60; // Dynamic ISR revalidation every 60 seconds
 
 export const metadata: Metadata = {
-  title: 'Gallery | Mahbub College Students Association',
+  title: 'Gallery',
+  alternates: { canonical: '/gallery' },
   description:
     'Historical glimpses of student life, events, sports, and memorable campus traditions of Mahbub College.',
 };

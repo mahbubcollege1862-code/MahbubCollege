@@ -24,7 +24,10 @@ async function sendDltSms(
   const formattedPhone = formatIndianPhone(phone);
 
   const gatewayUrl = process.env.SMS_GATEWAY_URL || 'http://13.127.107.32/sms/V1/send-sms-api.php';
-  const apiKey = process.env.SMS_API_KEY || 'gfJLlF6jqw06RXoW';
+  const apiKey = process.env.SMS_API_KEY;
+  if (!apiKey) {
+    throw new Error('SMS_API_KEY is not configured.');
+  }
   const senderId = process.env.SMS_SENDER_ID || 'MC1862';
   const entityId = process.env.SMS_DLT_ENTITY_ID || '1201162562947083464';
 

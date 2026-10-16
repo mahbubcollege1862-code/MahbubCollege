@@ -3,7 +3,8 @@ import type { Metadata } from 'next';
 import LegalPageLayout, { LegalSection } from '@/components/legal/LegalPageLayout';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Mahbub College Students Association',
+  title: 'Privacy Policy',
+  alternates: { canonical: '/privacy-policy' },
   description:
     'Official Privacy Policy of MahbubCollege Students Association, Secunderabad.',
 };
