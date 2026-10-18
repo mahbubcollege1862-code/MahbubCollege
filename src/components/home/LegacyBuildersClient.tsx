@@ -62,7 +62,7 @@ export default function LegacyBuildersClient({ builders }: Props) {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 lg:mb-12 font-google-sans">
           <div>
             <h2 className="text-gray-900 font-semibold text-2xl sm:text-3xl lg:text-[40px] leading-tight tracking-tight mb-2 sm:mb-3">
-              The People Who Built Our Legacy
+              Donors - The People Who Built Our Legacy
             </h2>
             <p className="text-gray-600 text-base sm:text-lg lg:text-[18px] font-normal leading-relaxed max-w-2xl">
               Honouring the founders and generous supporters whose vision and contributions helped shape our institution through generations.

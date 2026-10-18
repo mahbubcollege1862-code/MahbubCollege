@@ -36,6 +36,19 @@ export async function POST(req: Request) {
       );
     }
 
+    // Every field on the registration form is mandatory
+    if (
+      typeof relativeName !== 'string' || !relativeName.trim() ||
+      typeof dob !== 'string' ||
+      typeof branch !== 'string' || !branch.trim() ||
+      !photoUrl
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Please fill in all the fields, including your photo.' },
+        { status: 400 }
+      );
+    }
+
     if (!batchYear || !/^\d{4}$/.test(String(batchYear).trim())) {
       return NextResponse.json(
         { success: false, error: 'Batch (year of leaving) is required.' },

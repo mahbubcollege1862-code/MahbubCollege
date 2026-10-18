@@ -35,13 +35,14 @@ interface Props {
   value: string;
   onChange: (text: string) => void;
   className?: string;
+  required?: boolean;
 }
 
 /**
  * Date input that always shows dd/mm/yyyy regardless of the browser's language settings. Members can
  * type the date or pick it from the calendar button.
  */
-export default function DateField({ name, value, onChange, className = '' }: Props) {
+export default function DateField({ name, value, onChange, className = '', required }: Props) {
   const pickerRef = useRef<HTMLInputElement>(null);
   const iso = dmyToIso(value) ?? '';
 
@@ -61,6 +62,7 @@ export default function DateField({ name, value, onChange, className = '' }: Pro
         autoComplete="bday"
         placeholder="dd/mm/yyyy"
         maxLength={10}
+        required={required}
         value={value}
         onChange={(e) => onChange(maskDmy(e.target.value))}
         className={`${className} pr-12`}

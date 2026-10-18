@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 import { HeritageItem } from '@/types/database';
+import ZoomableImage from '@/components/common/ZoomableImage';
 
 export default async function Heritage() {
   let items: HeritageItem[] = [];
@@ -43,7 +44,11 @@ export default async function Heritage() {
               className="bg-white rounded-[20px] p-4 sm:p-5 border border-gray-200/90 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group"
             >
               {/* Image Container: Aspect ratio ~ 300/215 matching Figma 299.5x214.5 */}
-              <div className="relative w-full aspect-[300/215] rounded-[12px] overflow-hidden bg-gray-100 border border-black/5">
+              <ZoomableImage
+                src={item.photo_url}
+                caption={item.name}
+                className="relative block w-full aspect-[300/215] rounded-[12px] overflow-hidden bg-gray-100 border border-black/5"
+              >
                 <Image
                   src={item.photo_url}
                   alt={item.name}
@@ -52,7 +57,7 @@ export default async function Heritage() {
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover object-center group-hover:scale-104 transition-transform duration-500 filter contrast-[1.02]"
                 />
-              </div>
+              </ZoomableImage>
 
               {/* Building Name (Matches Figma Google Sans Flex, 16px, w600) */}
               <div className="mt-4 flex-1 flex items-start">

@@ -207,12 +207,28 @@ export default function ContactForm() {
       setErrorMessage('Please enter your full name.');
       return;
     }
-    if (formData.dob && !dmyToIso(formData.dob)) {
+    if (!formData.relativeName.trim()) {
+      setErrorMessage("Please enter your Father/Guardian's name.");
+      return;
+    }
+    if (!formData.dob.trim()) {
+      setErrorMessage('Please enter your date of birth.');
+      return;
+    }
+    if (!dmyToIso(formData.dob)) {
       setErrorMessage('Please enter your date of birth as dd/mm/yyyy, for example 15/03/1990.');
+      return;
+    }
+    if (!formData.branch) {
+      setErrorMessage('Please select your branch / institution.');
       return;
     }
     if (!formData.batchYear) {
       setErrorMessage('Please select your batch (year of leaving).');
+      return;
+    }
+    if (!photoBlob) {
+      setErrorMessage('Please add your profile photo.');
       return;
     }
     if (!formData.phone.trim()) {
@@ -427,28 +443,30 @@ export default function ContactForm() {
                   />
                 </div>
 
-                {/* 2. Relative Name (Optional, removed father/guardian) */}
+                {/* 2. Father/Guardian Name (Mandatory) */}
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">
-                    Relative Name
+                    Father/Guardian Name <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
                     name="relativeName"
                     value={formData.relativeName}
                     onChange={handleChange}
-                    placeholder="Enter Relative Name"
+                    placeholder="Enter Father/Guardian Name"
+                    required
                     className="w-full h-12 px-4 rounded-lg bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-hidden focus:border-[#800000] focus:ring-1 focus:ring-[#800000] text-sm transition-all shadow-xs"
                   />
                 </div>
 
-                {/* 3. Date of Birth (Optional) */}
+                {/* 3. Date of Birth (Mandatory) */}
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">
-                    Date of Birth
+                    Date of Birth <span className="text-red-400">*</span>
                   </label>
                   <DateField
                     name="dob"
+                    required
                     value={formData.dob}
                     onChange={(text) => setFormData((prev) => ({ ...prev, dob: text }))}
                     className="w-full h-12 px-4 rounded-lg bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-hidden focus:border-[#800000] focus:ring-1 focus:ring-[#800000] text-sm transition-all shadow-xs"
@@ -458,10 +476,11 @@ export default function ContactForm() {
                 {/* 4. Branch / Institution (Dropdown, Configurable from Supabase table) */}
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">
-                    Branch / Institution
+                    Branch / Institution <span className="text-red-400">*</span>
                   </label>
                   <select
                     name="branch"
+                    required
                     value={formData.branch}
                     onChange={handleChange}
                     className="w-full h-12 px-4 rounded-lg bg-white border border-gray-300 text-gray-900 focus:outline-hidden focus:border-[#800000] focus:ring-1 focus:ring-[#800000] text-sm transition-all cursor-pointer shadow-xs"
@@ -496,10 +515,10 @@ export default function ContactForm() {
                   </select>
                 </div>
 
-                {/* Profile photo (optional) - shown on the membership card */}
+                {/* Profile photo (Mandatory) - shown on the membership card */}
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">
-                    Profile Photo <span className="text-gray-400 font-normal">(optional, shown on your membership card)</span>
+                    Profile Photo <span className="text-red-400">*</span> <span className="text-gray-400 font-normal">(shown on your membership card)</span>
                   </label>
                   <div className="flex items-center gap-4">
                     {photoPreview && (

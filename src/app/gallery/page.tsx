@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import { GalleryItem } from '@/types/database';
 import PageHeroBanner from '@/components/common/PageHeroBanner';
+import ZoomableImage from '@/components/common/ZoomableImage';
 
 export const revalidate = 60; // Dynamic ISR revalidation every 60 seconds
 
@@ -49,8 +50,12 @@ export default async function GalleryPage() {
                   key={item.id || item.name}
                   className="relative rounded-[14px] overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group bg-white border border-gray-300"
                 >
-                  {/* Photo container (No zoom functionality on click) */}
-                  <div className="relative w-full h-[220px] sm:h-[240px] lg:h-[260px] bg-gray-200 overflow-hidden">
+                  {/* Photo: click to open it larger in a popup */}
+                  <ZoomableImage
+                    src={item.photo_url}
+                    caption={item.name}
+                    className="relative block w-full h-[220px] sm:h-[240px] lg:h-[260px] bg-gray-200 overflow-hidden"
+                  >
                     <Image
                       src={item.photo_url}
                       alt={item.name}
@@ -59,7 +64,7 @@ export default async function GalleryPage() {
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover object-center group-hover:scale-105 transition-transform duration-500 filter contrast-[1.02]"
                     />
-                  </div>
+                  </ZoomableImage>
 
                   {/* Maroon Bottom Banner Strip matching Figma */}
                   <div className="bg-[#800000] px-4 py-3.5 flex items-center min-h-[52px]">

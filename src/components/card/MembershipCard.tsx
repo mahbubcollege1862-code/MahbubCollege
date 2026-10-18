@@ -19,6 +19,7 @@ const FONT_FAMILY = "'Google Sans Flex Variable', 'Google Sans Flex', system-ui,
 const TEXT_COLOR = '#272727';
 const NAME_MAX_WIDTH = 134; // text starts at x=173; the QR code begins at x=328
 const RELATIVE_MAX_WIDTH = 145;
+const RELATIVE_SINGLE_LINE_MAX_WIDTH = 205;
 
 let measureCtx: CanvasRenderingContext2D | null | undefined;
 
@@ -73,12 +74,20 @@ function layoutName(name: string) {
   return fitTwoLines(words, NAME_MAX_WIDTH, 13.5, 8, (t, _i, size) => measure(t, size, 600));
 }
 
-/** Relative name: the "Relative Name:" label shares the first line with the start of the value. */
+const RELATIVE_LABEL = 'Father/Guardian Name: ';
+
+/** Father/guardian name: the label shares the first line with the start of the value. */
 function layoutRelative(value: string) {
-  const words = value.trim().split(/\s+/);
-  return fitTwoLines(words, RELATIVE_MAX_WIDTH, 7.5, 5.5, (t, i, size) =>
-    i === 0 ? measure('Relative Name: ', size, 400) + measure(t, size, 700) : measure(t, size, 700)
-  );
+  const text = value.trim();
+  const words = text.split(/\s+/);
+  const widthOf = (t: string, i: number, size: number) =>
+    i === 0 ? measure(RELATIVE_LABEL, size, 400) + measure(t, size, 700) : measure(t, size, 700);
+
+  // On one line the text sits below the QR code, so it can use more of the card's width.
+  if (widthOf(text, 0, 7.5) <= RELATIVE_SINGLE_LINE_MAX_WIDTH) return { lines: [text], fontSize: 7.5 };
+
+  // Otherwise two lines; the first line sits beside the QR code, so it must stop before it.
+  return fitTwoLines(words, RELATIVE_MAX_WIDTH, 7.5, 5.5, widthOf);
 }
 
 const PHOTO_BOX = { x: 62.5, y: 110, size: 98 };
@@ -111,7 +120,7 @@ const MembershipCard = forwardRef<SVGSVGElement, MembershipCardData & { classNam
     const nameBaselines = name.lines.length === 1 ? [134.5] : [127, 142];
     const labelSize = 7.5;
     const relative = relativeName?.trim() ? layoutRelative(relativeName) : null;
-    const relativeBaselines = relative && relative.lines.length > 1 ? [154, 162.5] : [161.5];
+    const relativeBaselines = relative && relative.lines.length > 1 ? [154, 162.5] : [163];
 
     return (
       <svg
@@ -152,7 +161,7 @@ const MembershipCard = forwardRef<SVGSVGElement, MembershipCardData & { classNam
             <text fontFamily={FONT_FAMILY} fontSize={relative.fontSize} fill={TEXT_COLOR}>
               {relative.lines.map((line, i) => (
                 <tspan key={i} x="173" y={relativeBaselines[i]}>
-                  {i === 0 && 'Relative Name: '}
+                  {i === 0 && RELATIVE_LABEL}
                   <tspan fontWeight={700}>{line}</tspan>
                 </tspan>
               ))}
