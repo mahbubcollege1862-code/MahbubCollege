@@ -36,6 +36,7 @@ export async function POST(req: Request) {
       member: {
         fullName: member.full_name,
         relativeName: member.relative_name,
+        branch: member.branch,
         batchYear: member.batch_year,
         membershipId: member.membership_id,
         photoUrl: member.photo_url,

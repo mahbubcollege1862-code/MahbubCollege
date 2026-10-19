@@ -98,7 +98,8 @@ export default function ContactForm() {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      const next = name === 'fullName' || name === 'relativeName' ? value.toUpperCase() : value;
+      setFormData((prev) => ({ ...prev, [name]: next }));
     }
   };
 
@@ -208,7 +209,7 @@ export default function ContactForm() {
       return;
     }
     if (!formData.relativeName.trim()) {
-      setErrorMessage("Please enter your Father/Guardian's name.");
+      setErrorMessage("Please enter your Father's name.");
       return;
     }
     if (!formData.dob.trim()) {
@@ -254,8 +255,8 @@ export default function ContactForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fullName: formData.fullName.trim(),
-          relativeName: formData.relativeName.trim() || null,
+          fullName: formData.fullName.trim().toUpperCase(),
+          relativeName: formData.relativeName.trim().toUpperCase() || null,
           dob: dmyToIso(formData.dob),
           branch: formData.branch || null,
           batchYear: formData.batchYear || null,
@@ -271,8 +272,9 @@ export default function ContactForm() {
       }
 
       setCardData({
-        fullName: formData.fullName.trim(),
-        relativeName: formData.relativeName.trim() || null,
+        fullName: formData.fullName.trim().toUpperCase(),
+        relativeName: formData.relativeName.trim().toUpperCase() || null,
+        branch: formData.branch,
         batchYear: formData.batchYear,
         membershipId: data.membershipId || '',
         photoUrl: photoPreview || null,
@@ -443,17 +445,17 @@ export default function ContactForm() {
                   />
                 </div>
 
-                {/* 2. Father/Guardian Name (Mandatory) */}
+                {/* 2. Father Name (Mandatory) */}
                 <div>
                   <label className="block text-sm font-medium text-white mb-1.5">
-                    Father/Guardian Name <span className="text-red-400">*</span>
+                    Father Name <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
                     name="relativeName"
                     value={formData.relativeName}
                     onChange={handleChange}
-                    placeholder="Enter Father/Guardian Name"
+                    placeholder="Enter Father Name"
                     required
                     className="w-full h-12 px-4 rounded-lg bg-white border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-hidden focus:border-[#800000] focus:ring-1 focus:ring-[#800000] text-sm transition-all shadow-xs"
                   />

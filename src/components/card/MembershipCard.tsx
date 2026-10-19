@@ -1,4 +1,4 @@
-import React, { forwardRef, useMemo } from 'react';
+import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
 import { CARD_PLACEHOLDER, CARD_STATIC_MARKUP } from './cardStatic';
 
@@ -9,6 +9,7 @@ export const CARD_WEBSITE_URL = 'https://mahbubcollege.com';
 export interface MembershipCardData {
   fullName: string;
   relativeName?: string | null;
+  branch?: string | null;
   batchYear: string;
   membershipId: string;
   /** Public URL or data URL of the member photo. A silhouette is shown when empty. */
@@ -17,9 +18,10 @@ export interface MembershipCardData {
 
 const FONT_FAMILY = "'Google Sans Flex Variable', 'Google Sans Flex', system-ui, sans-serif";
 const TEXT_COLOR = '#272727';
-const NAME_MAX_WIDTH = 134; // text starts at x=173; the QR code begins at x=328
-const RELATIVE_MAX_WIDTH = 145;
-const RELATIVE_SINGLE_LINE_MAX_WIDTH = 205;
+const NAME_MAX_WIDTH = 148; // text starts at x=173; the QR code begins at x=328
+const RELATIVE_MAX_WIDTH = 140;
+const WHITE_PANEL_TOP = 90;
+const ID_MAX_WIDTH = 150;
 
 let measureCtx: CanvasRenderingContext2D | null | undefined;
 
@@ -28,8 +30,9 @@ function measure(text: string, size: number, weight: number): number {
   if (typeof document !== 'undefined') {
     if (measureCtx === undefined) measureCtx = document.createElement('canvas').getContext('2d');
     if (measureCtx) {
-      measureCtx.font = `${weight} 100px ${FONT_FAMILY}`;
-      return (measureCtx.measureText(text).width * size) / 100;
+      // Measured at the real size: the font's optical-size axis makes glyphs wider at small sizes.
+      measureCtx.font = `${weight} ${size}px ${FONT_FAMILY}`;
+      return measureCtx.measureText(text).width;
     }
   }
   return text.length * size * 0.55;
@@ -71,23 +74,83 @@ function fitTwoLines(
 
 function layoutName(name: string) {
   const words = name.trim().split(/\s+/);
-  return fitTwoLines(words, NAME_MAX_WIDTH, 13.5, 8, (t, _i, size) => measure(t, size, 600));
+  return fitTwoLines(words, NAME_MAX_WIDTH, 11.5, 6.5, (t, _i, size) => measure(t, size, 700));
 }
 
-const RELATIVE_LABEL = 'Father/Guardian Name: ';
+const RELATIVE_LABEL = 'Father Name: ';
+const BRANCH_LABEL = 'Branch: ';
+const ID_LABEL = 'Membership ID: ';
+const FIELD_SIZE = 7.5;
+const FIELD_MIN_SIZE = 5.5;
 
-/** Father/guardian name: the label shares the first line with the start of the value. */
-function layoutRelative(value: string) {
-  const text = value.trim();
-  const words = text.split(/\s+/);
+/** Labelled field (label shares the first line with the start of the value), wrapped to at most two lines. */
+function layoutLabelled(value: string, label: string) {
+  const words = value.trim().split(/\s+/);
   const widthOf = (t: string, i: number, size: number) =>
-    i === 0 ? measure(RELATIVE_LABEL, size, 400) + measure(t, size, 700) : measure(t, size, 700);
+    i === 0 ? measure(label, size, 400) + measure(t, size, 700) : measure(t, size, 700);
+  return fitTwoLines(words, RELATIVE_MAX_WIDTH, FIELD_SIZE, FIELD_MIN_SIZE, widthOf);
+}
 
-  // On one line the text sits below the QR code, so it can use more of the card's width.
-  if (widthOf(text, 0, 7.5) <= RELATIVE_SINGLE_LINE_MAX_WIDTH) return { lines: [text], fontSize: 7.5 };
+/** Baselines for `count` lines starting at `top`, advancing by `step`. */
+function stack(top: number, count: number, step: number): number[] {
+  return Array.from({ length: count }, (_, i) => top + i * step);
+}
 
-  // Otherwise two lines; the first line sits beside the QR code, so it must stop before it.
-  return fitTwoLines(words, RELATIVE_MAX_WIDTH, 7.5, 5.5, widthOf);
+/** Single-line font size for the membership ID, shrunk until it stops short of the QR code. */
+function fitIdSize(membershipId: string): number {
+  let size = FIELD_SIZE;
+  while (size > FIELD_MIN_SIZE && measure(ID_LABEL, size, 400) + measure(membershipId, size, 700) > ID_MAX_WIDTH) {
+    size -= 0.25;
+  }
+  return size;
+}
+
+/** Vertical layout of all text rows, starting at the top of the white panel; wrapped rows push the rows below them down. */
+function layoutCard(fullName: string, membershipId: string, relativeName?: string | null, branch?: string | null) {
+  const idSize = fitIdSize(membershipId);
+  const name = layoutName(fullName.trim().toUpperCase());
+  const relative = relativeName?.trim() ? layoutLabelled(relativeName.toUpperCase(), RELATIVE_LABEL) : null;
+  const branchRow = branch?.trim() ? layoutLabelled(branch, BRANCH_LABEL) : null;
+
+  const nameStep = name.fontSize * 1.2;
+  const nameBaselines = stack(name.fontSize * 0.85, name.lines.length, nameStep);
+  let cursor = nameBaselines[nameBaselines.length - 1] + 11;
+
+  let relativeBaselines: number[] = [];
+  if (relative) {
+    relativeBaselines = stack(cursor, relative.lines.length, relative.fontSize * 1.3);
+    cursor = relativeBaselines[relativeBaselines.length - 1] + 6;
+  }
+  const divider1 = cursor;
+  const idBaseline = divider1 + 12;
+  const divider2 = idBaseline + 7;
+
+  let branchBaselines: number[] = [];
+  let divider3: number | null = null;
+  let batchBaseline = divider2 + 12;
+  if (branchRow) {
+    branchBaselines = stack(divider2 + 11, branchRow.lines.length, branchRow.fontSize * 1.3);
+    divider3 = branchBaselines[branchBaselines.length - 1] + 7;
+    batchBaseline = divider3 + 12;
+  }
+
+  const offset = WHITE_PANEL_TOP + 7;
+  const shift = (ys: number[]) => ys.map((y) => y + offset);
+
+  return {
+    name,
+    nameBaselines: shift(nameBaselines),
+    relative,
+    relativeBaselines: shift(relativeBaselines),
+    branchRow,
+    branchBaselines: shift(branchBaselines),
+    divider1: divider1 + offset,
+    idBaseline: idBaseline + offset,
+    idSize,
+    divider2: divider2 + offset,
+    divider3: divider3 === null ? null : divider3 + offset,
+    batchBaseline: batchBaseline + offset,
+  };
 }
 
 const PHOTO_BOX = { x: 62.5, y: 110, size: 98 };
@@ -113,14 +176,37 @@ function buildQrPath(): string {
 }
 
 const MembershipCard = forwardRef<SVGSVGElement, MembershipCardData & { className?: string }>(
-  function MembershipCard({ fullName, relativeName, batchYear, membershipId, photoUrl, className }, ref) {
+  function MembershipCard({ fullName, relativeName, branch, batchYear, membershipId, photoUrl, className }, ref) {
     const qrPath = useMemo(buildQrPath, []);
 
-    const name = layoutName(fullName.trim());
-    const nameBaselines = name.lines.length === 1 ? [134.5] : [127, 142];
-    const labelSize = 7.5;
-    const relative = relativeName?.trim() ? layoutRelative(relativeName) : null;
-    const relativeBaselines = relative && relative.lines.length > 1 ? [154, 162.5] : [163];
+    // Text is measured with the real font, so lay out again once web fonts have loaded.
+    const [, setFontsReady] = useState(false);
+    useEffect(() => {
+      Promise.all([
+        document.fonts.load(`600 13px ${FONT_FAMILY}`),
+        document.fonts.load(`400 8px ${FONT_FAMILY}`),
+        document.fonts.load(`700 8px ${FONT_FAMILY}`),
+      ])
+        .then(() => document.fonts.ready)
+        .then(() => setFontsReady(true))
+        .catch(() => {});
+    }, []);
+
+    const labelSize = FIELD_SIZE;
+    const {
+      name,
+      nameBaselines,
+      relative,
+      relativeBaselines,
+      branchRow,
+      branchBaselines,
+      divider1,
+      idBaseline,
+      idSize,
+      divider2,
+      divider3,
+      batchBaseline,
+    } = layoutCard(fullName, membershipId, relativeName, branch);
 
     return (
       <svg
@@ -149,7 +235,7 @@ const MembershipCard = forwardRef<SVGSVGElement, MembershipCardData & { classNam
           <g dangerouslySetInnerHTML={{ __html: CARD_STATIC_MARKUP }} />
 
           {/* Member name */}
-          <text fontFamily={FONT_FAMILY} fontWeight={600} fontSize={name.fontSize} fill={TEXT_COLOR}>
+          <text fontFamily={FONT_FAMILY} fontWeight={700} fontSize={name.fontSize} fill={TEXT_COLOR}>
             {name.lines.map((line, i) => (
               <tspan key={i} x="173" y={nameBaselines[i]}>
                 {line}
@@ -167,14 +253,29 @@ const MembershipCard = forwardRef<SVGSVGElement, MembershipCardData & { classNam
               ))}
             </text>
           )}
-          <line x1="173" y1="169" x2="283" y2="169" stroke="#800000" strokeWidth="0.25" />
+          <line x1="173" y1={divider1} x2="283" y2={divider1} stroke="#800000" strokeWidth="0.25" />
 
-          <text x="173" y="181" fontFamily={FONT_FAMILY} fontSize={labelSize} fill={TEXT_COLOR}>
-            Membership ID: <tspan fontWeight={700}>{membershipId}</tspan>
+          <text x="173" y={idBaseline} fontFamily={FONT_FAMILY} fontSize={idSize} fill={TEXT_COLOR}>
+            {ID_LABEL}<tspan fontWeight={700}>{membershipId}</tspan>
           </text>
-          <line x1="173" y1="188" x2="283" y2="188" stroke="#800000" strokeWidth="0.25" />
+          <line x1="173" y1={divider2} x2="283" y2={divider2} stroke="#800000" strokeWidth="0.25" />
 
-          <text x="173" y="200" fontFamily={FONT_FAMILY} fontSize={labelSize} fill={TEXT_COLOR}>
+          {branchRow && (
+            <text fontFamily={FONT_FAMILY} fontSize={branchRow.fontSize} fill={TEXT_COLOR}>
+              {branchRow.lines.map((line, i) => (
+                <tspan key={i} x="173" y={branchBaselines[i]}>
+                  {i === 0 && BRANCH_LABEL}
+                  <tspan fontWeight={700}>{line}</tspan>
+                </tspan>
+              ))}
+            </text>
+          )}
+
+          {divider3 !== null && (
+            <line x1="173" y1={divider3} x2="283" y2={divider3} stroke="#800000" strokeWidth="0.25" />
+          )}
+
+          <text x="173" y={batchBaseline} fontFamily={FONT_FAMILY} fontSize={labelSize} fill={TEXT_COLOR}>
             BATCH: <tspan fontWeight={700}>{batchYear}</tspan>
           </text>
 
@@ -192,7 +293,7 @@ const MembershipCard = forwardRef<SVGSVGElement, MembershipCardData & { classNam
           ) : (
             <g dangerouslySetInnerHTML={{ __html: CARD_PLACEHOLDER }} />
           )}
-          <rect x={PHOTO_BOX.x} y={PHOTO_BOX.y} width={PHOTO_BOX.size} height={PHOTO_BOX.size} rx="4.5" fill="none" stroke="#800000" />
+          <rect x={PHOTO_BOX.x} y={PHOTO_BOX.y} width={PHOTO_BOX.size} height={PHOTO_BOX.size} rx="4.5" fill="none" stroke="#E6CF94" strokeWidth="1.5" />
 
           {/* QR code linking to the website */}
           <path d={qrPath} fill={TEXT_COLOR} shapeRendering="crispEdges" />

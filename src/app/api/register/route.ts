@@ -82,8 +82,8 @@ export async function POST(req: Request) {
     // 1. Create the registration and its membership ID atomically in the database
     const { data, error } = await getAdminClient().rpc('register_member', {
       p_user_id: null,
-      p_full_name: fullName.trim(),
-      p_relative_name: relativeName ? relativeName.trim() : null,
+      p_full_name: fullName.trim().toUpperCase(),
+      p_relative_name: relativeName ? relativeName.trim().toUpperCase() : null,
       p_dob: dob || null,
       p_branch: branch || null,
       p_batch_year: String(batchYear).trim(),
