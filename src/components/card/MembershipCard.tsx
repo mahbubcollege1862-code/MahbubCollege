@@ -1,9 +1,13 @@
 import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import QRCode from 'qrcode';
 import { CARD_PLACEHOLDER, CARD_STATIC_MARKUP } from './cardStatic';
+import { toNameCase } from '@/lib/nameCase';
 
 export const CARD_WIDTH = 440;
 export const CARD_HEIGHT = 276;
+// Physical print size of the PVC card; the artwork is drawn at this aspect ratio.
+export const CARD_WIDTH_MM = 86;
+export const CARD_HEIGHT_MM = 54;
 export const CARD_WEBSITE_URL = 'https://mahbubcollege.com';
 
 export interface MembershipCardData {
@@ -20,7 +24,9 @@ const FONT_FAMILY = "'Google Sans Flex Variable', 'Google Sans Flex', system-ui,
 const TEXT_COLOR = '#272727';
 const NAME_MAX_WIDTH = 148; // text starts at x=173; the QR code begins at x=328
 const RELATIVE_MAX_WIDTH = 140;
-const WHITE_PANEL_TOP = 90;
+const BRANCH_MAX_WIDTH = 122; // the signature caption starts at about x=299, level with this row
+const NAME_SIZE = 9.5;
+const NAME_SINGLE_LINE_MIN_SIZE = 8.5;
 const ID_MAX_WIDTH = 150;
 
 let measureCtx: CanvasRenderingContext2D | null | undefined;
@@ -74,7 +80,12 @@ function fitTwoLines(
 
 function layoutName(name: string) {
   const words = name.trim().split(/\s+/);
-  return fitTwoLines(words, NAME_MAX_WIDTH, 11.5, 6.5, (t, _i, size) => measure(t, size, 700));
+  const widthOf = (t: string, _i: number, size: number) => measure(t, size, 700);
+  // Prefer one line if it fits with a small shrink; otherwise wrap to two lines at the full size.
+  for (let size = NAME_SIZE; size >= NAME_SINGLE_LINE_MIN_SIZE; size -= 0.25) {
+    if (widthOf(name.trim(), 0, size) <= NAME_MAX_WIDTH) return { lines: [name.trim()], fontSize: size };
+  }
+  return fitTwoLines(words, NAME_MAX_WIDTH, NAME_SIZE, 6.5, widthOf);
 }
 
 const RELATIVE_LABEL = 'Father Name: ';
@@ -84,11 +95,11 @@ const FIELD_SIZE = 7.5;
 const FIELD_MIN_SIZE = 5.5;
 
 /** Labelled field (label shares the first line with the start of the value), wrapped to at most two lines. */
-function layoutLabelled(value: string, label: string) {
+function layoutLabelled(value: string, label: string, maxWidth = RELATIVE_MAX_WIDTH) {
   const words = value.trim().split(/\s+/);
   const widthOf = (t: string, i: number, size: number) =>
     i === 0 ? measure(label, size, 400) + measure(t, size, 700) : measure(t, size, 700);
-  return fitTwoLines(words, RELATIVE_MAX_WIDTH, FIELD_SIZE, FIELD_MIN_SIZE, widthOf);
+  return fitTwoLines(words, maxWidth, FIELD_SIZE, FIELD_MIN_SIZE, widthOf);
 }
 
 /** Baselines for `count` lines starting at `top`, advancing by `step`. */
@@ -108,17 +119,19 @@ function fitIdSize(membershipId: string): number {
 /** Vertical layout of all text rows, starting at the top of the white panel; wrapped rows push the rows below them down. */
 function layoutCard(fullName: string, membershipId: string, relativeName?: string | null, branch?: string | null) {
   const idSize = fitIdSize(membershipId);
-  const name = layoutName(fullName.trim().toUpperCase());
-  const relative = relativeName?.trim() ? layoutLabelled(relativeName.toUpperCase(), RELATIVE_LABEL) : null;
-  const branchRow = branch?.trim() ? layoutLabelled(branch, BRANCH_LABEL) : null;
+  const name = layoutName(toNameCase(fullName.trim()));
+  const relative = relativeName?.trim() ? layoutLabelled(toNameCase(relativeName.trim()), RELATIVE_LABEL) : null;
+  const branchRow = branch?.trim() ? layoutLabelled(branch, BRANCH_LABEL, BRANCH_MAX_WIDTH) : null;
 
   const nameStep = name.fontSize * 1.2;
   const nameBaselines = stack(name.fontSize * 0.85, name.lines.length, nameStep);
-  let cursor = nameBaselines[nameBaselines.length - 1] + 11;
+  let cursor = nameBaselines[nameBaselines.length - 1] + 5;
 
+  let divider0: number | null = null;
   let relativeBaselines: number[] = [];
   if (relative) {
-    relativeBaselines = stack(cursor, relative.lines.length, relative.fontSize * 1.3);
+    divider0 = cursor;
+    relativeBaselines = stack(divider0 + 10, relative.lines.length, relative.fontSize * 1.3);
     cursor = relativeBaselines[relativeBaselines.length - 1] + 6;
   }
   const divider1 = cursor;
@@ -134,7 +147,8 @@ function layoutCard(fullName: string, membershipId: string, relativeName?: strin
     batchBaseline = divider3 + 12;
   }
 
-  const offset = WHITE_PANEL_TOP + 7;
+  // The first line's cap height (~0.72em) sits level with the top edge of the photo frame.
+  const offset = PHOTO_BOX.y - name.fontSize * 0.13;
   const shift = (ys: number[]) => ys.map((y) => y + offset);
 
   return {
@@ -145,6 +159,7 @@ function layoutCard(fullName: string, membershipId: string, relativeName?: strin
     branchRow,
     branchBaselines: shift(branchBaselines),
     divider1: divider1 + offset,
+    divider0: divider0 === null ? null : divider0 + offset,
     idBaseline: idBaseline + offset,
     idSize,
     divider2: divider2 + offset,
@@ -201,6 +216,7 @@ const MembershipCard = forwardRef<SVGSVGElement, MembershipCardData & { classNam
       branchRow,
       branchBaselines,
       divider1,
+      divider0,
       idBaseline,
       idSize,
       divider2,
@@ -252,6 +268,9 @@ const MembershipCard = forwardRef<SVGSVGElement, MembershipCardData & { classNam
                 </tspan>
               ))}
             </text>
+          )}
+          {divider0 !== null && (
+            <line x1="173" y1={divider0} x2="283" y2={divider0} stroke="#800000" strokeWidth="0.25" />
           )}
           <line x1="173" y1={divider1} x2="283" y2={divider1} stroke="#800000" strokeWidth="0.25" />
 

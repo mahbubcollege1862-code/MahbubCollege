@@ -1,6 +1,42 @@
-import { CARD_HEIGHT, CARD_WIDTH } from './MembershipCard';
+import { CARD_HEIGHT_MM, CARD_WIDTH_MM } from './MembershipCard';
 
-const EXPORT_SCALE = 4; // 1760 x 1104 px
+// 86 x 54 mm (CR80 PVC card) at 600 dpi
+const EXPORT_DPI = 600;
+const EXPORT_WIDTH_PX = Math.round((CARD_WIDTH_MM / 25.4) * EXPORT_DPI); // 2031
+const EXPORT_HEIGHT_PX = Math.round((CARD_HEIGHT_MM / 25.4) * EXPORT_DPI); // 1276
+
+const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
+  let c = n;
+  for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  return c >>> 0;
+});
+
+function crc32(bytes: Uint8Array): number {
+  let c = 0xffffffff;
+  for (const b of bytes) c = CRC_TABLE[(c ^ b) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+/** Adds a pHYs chunk so print software places the PNG at its real 86 x 54 mm size. */
+async function withPngDpi(blob: Blob, dpi: number): Promise<Blob> {
+  const png = new Uint8Array(await blob.arrayBuffer());
+  const ppm = Math.round(dpi / 0.0254);
+  const chunk = new Uint8Array(21); // length(4) + type(4) + data(9) + crc(4)
+  const view = new DataView(chunk.buffer);
+  view.setUint32(0, 9);
+  chunk.set([0x70, 0x48, 0x59, 0x73], 4); // 'pHYs'
+  view.setUint32(8, ppm);
+  view.setUint32(12, ppm);
+  chunk[16] = 1; // unit: metre
+  view.setUint32(17, crc32(chunk.subarray(4, 17)));
+
+  const insertAt = 33; // after the signature (8) and the IHDR chunk (25)
+  const out = new Uint8Array(png.length + chunk.length);
+  out.set(png.subarray(0, insertAt), 0);
+  out.set(chunk, insertAt);
+  out.set(png.subarray(insertAt), insertAt + chunk.length);
+  return new Blob([out], { type: 'image/png' });
+}
 
 const FONT_URL = '/fonts/google-sans-flex-latin-wght-normal.woff2';
 
@@ -39,8 +75,9 @@ export async function cardToPngBlob(svg: SVGSVGElement): Promise<Blob> {
   style.textContent = `@font-face{font-family:'Google Sans Flex Variable';font-weight:100 900;src:url(${fontData}) format('woff2');}`;
   clone.insertBefore(style, clone.firstChild);
 
-  clone.setAttribute('width', String(CARD_WIDTH * EXPORT_SCALE));
-  clone.setAttribute('height', String(CARD_HEIGHT * EXPORT_SCALE));
+  clone.setAttribute('width', String(EXPORT_WIDTH_PX));
+  clone.setAttribute('height', String(EXPORT_HEIGHT_PX));
+  clone.setAttribute('preserveAspectRatio', 'none');
 
   const svgText = new XMLSerializer().serializeToString(clone);
   const svgUrl = URL.createObjectURL(new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' }));
@@ -55,15 +92,16 @@ export async function cardToPngBlob(svg: SVGSVGElement): Promise<Blob> {
     });
 
     const canvas = document.createElement('canvas');
-    canvas.width = CARD_WIDTH * EXPORT_SCALE;
-    canvas.height = CARD_HEIGHT * EXPORT_SCALE;
+    canvas.width = EXPORT_WIDTH_PX;
+    canvas.height = EXPORT_HEIGHT_PX;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas is not supported in this browser.');
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    return await new Promise<Blob>((resolve, reject) => {
+    const png = await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Could not create the image.'))), 'image/png');
     });
+    return await withPngDpi(png, EXPORT_DPI);
   } finally {
     URL.revokeObjectURL(svgUrl);
   }

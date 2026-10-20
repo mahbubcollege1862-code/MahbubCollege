@@ -10,6 +10,7 @@ import CardLookup from './CardLookup';
 import TurnstileWidget, { turnstileEnabled } from './TurnstileWidget';
 import DateField, { dmyToIso } from './DateField';
 import { blobToDataUrl, uploadMemberPhoto, validatePhotoFile } from '@/lib/photoUpload';
+import { toNameCase } from '@/lib/nameCase';
 import PhotoCropper from './PhotoCropper';
 
 export default function ContactForm() {
@@ -98,7 +99,7 @@ export default function ContactForm() {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
-      const next = name === 'fullName' || name === 'relativeName' ? value.toUpperCase() : value;
+      const next = name === 'fullName' || name === 'relativeName' ? toNameCase(value) : value;
       setFormData((prev) => ({ ...prev, [name]: next }));
     }
   };
@@ -255,8 +256,8 @@ export default function ContactForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fullName: formData.fullName.trim().toUpperCase(),
-          relativeName: formData.relativeName.trim().toUpperCase() || null,
+          fullName: toNameCase(formData.fullName.trim()),
+          relativeName: toNameCase(formData.relativeName.trim()) || null,
           dob: dmyToIso(formData.dob),
           branch: formData.branch || null,
           batchYear: formData.batchYear || null,
@@ -272,8 +273,8 @@ export default function ContactForm() {
       }
 
       setCardData({
-        fullName: formData.fullName.trim().toUpperCase(),
-        relativeName: formData.relativeName.trim().toUpperCase() || null,
+        fullName: toNameCase(formData.fullName.trim()),
+        relativeName: toNameCase(formData.relativeName.trim()) || null,
         branch: formData.branch,
         batchYear: formData.batchYear,
         membershipId: data.membershipId || '',
